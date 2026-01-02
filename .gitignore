@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Strapi
+cms/.tmp
+cms/.cache
+cms/.strapi
+cms/exports/
+cms/public/uploads/*
+!cms/public/uploads/.gitkeep
+
+# Backup files
+*.tar.gz
+*.tar.gz.enc
+backup*
+
+# Scripts with tokens
+scripts/.env
+
+# Misc
+*.pid
+*.seed
+coverage/
+.nyc_output/

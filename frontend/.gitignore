@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Large gallery images (served from Strapi)
+/public/*.JPG
+/public/*.PNG
+/public/assets/img/*.PNG
+/public/assets/img/*.JPG
+/public/assets/img/f.png
