@@ -1,0 +1,52 @@
+{
+  "kind": "singleType",
+  "collectionName": "homepages",
+  "info": {
+    "singularName": "homepage",
+    "pluralName": "homepages",
+    "displayName": "Homepage",
+    "description": "Homepage content settings"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "bannerTitle": {
+      "type": "string",
+      "required": true,
+      "default": "Art Classes with Alevtyna"
+    },
+    "bannerSubtitle": {
+      "type": "text"
+    },
+    "bannerImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "bannerImageMobile": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "aboutTitle": {
+      "type": "string",
+      "default": "About Me"
+    },
+    "aboutText": {
+      "type": "richtext"
+    },
+    "aboutImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "cancellationPolicy": {
+      "type": "richtext"
+    },
+    "whyChooseUsItems": {
+      "type": "json"
+    }
+  }
+}

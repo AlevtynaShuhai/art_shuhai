@@ -1,0 +1,72 @@
+{
+  "kind": "collectionType",
+  "collectionName": "leads",
+  "info": {
+    "singularName": "lead",
+    "pluralName": "leads",
+    "displayName": "Lead",
+    "description": "Customer leads and orders"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "email",
+      "required": true
+    },
+    "message": {
+      "type": "text"
+    },
+    "event": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::event.event"
+    },
+    "eventName": {
+      "type": "string"
+    },
+    "eventDate": {
+      "type": "string"
+    },
+    "eventTime": {
+      "type": "string"
+    },
+    "eventPrice": {
+      "type": "decimal"
+    },
+    "eventLocation": {
+      "type": "string"
+    },
+    "paymentStatus": {
+      "type": "enumeration",
+      "enum": ["pending", "paid", "failed", "refunded"],
+      "default": "pending"
+    },
+    "stripeSessionId": {
+      "type": "string"
+    },
+    "stripePaymentIntent": {
+      "type": "string"
+    },
+    "securityNonce": {
+      "type": "string"
+    },
+    "telegramSent": {
+      "type": "boolean",
+      "default": false
+    },
+    "isSubscribed": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}
