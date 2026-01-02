@@ -43,121 +43,116 @@ export default function HomePageClient({
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
-        {/* Background Image */}
-        {homepage?.bannerImage && (
-          <>
-            <Image
-              src={getStrapiMediaUrl(homepage.bannerImage)}
-              alt="Hero background"
-              fill
-              className="object-cover hidden md:block"
-              priority
-            />
-            {homepage.bannerImageMobile && (
-              <Image
-                src={getStrapiMediaUrl(homepage.bannerImageMobile)}
-                alt="Hero background"
-                fill
-                className="object-cover md:hidden"
-                priority
-              />
-            )}
-          </>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/50" />
-
-        {/* Content */}
-        <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-serif mb-6 animate-fade-in">
-            {homepage?.bannerTitle || 'Art Classes with Alevtyna'}
-          </h1>
-          {homepage?.bannerSubtitle && (
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
-              {homepage.bannerSubtitle}
-            </p>
-          )}
-          <a
-            href="#events"
-            className="inline-block btn-primary text-lg"
-          >
-            View Upcoming Classes
+      {/* Hero Section - V1 Banner Style */}
+      <section className="banner h-[520px] lg:h-[700px] mb-[80px] lg:mb-[200px]">
+        <div className="container mx-auto px-[15px] flex flex-col items-center">
+          <div className="text-white font-serif text-[38px] lg:text-[72px] font-bold leading-[100%] text-center uppercase italic mt-[115px] lg:mt-[177px] mb-[15px] lg:mb-[21px]">
+            "Art washes away from the<br />soul the dust<br />of everyday life"
+          </div>
+          <div className="text-white text-[18px] lg:text-[30px] font-normal leading-[120%] mb-[30px] lg:mb-[40px]">
+            Pablo Picasso
+          </div>
+          <a href="#events" className="main-button">
+            View events
           </a>
         </div>
       </section>
 
-      {/* Why Choose Us Section */}
-      <section className="section bg-gradient-to-br from-orange-50 to-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl md:text-5xl font-serif text-center mb-12">
-            Why Choose Us?
+      {/* Why Choose Us Section - V1 Style */}
+      <section className="section-spacing">
+        <div className="container mx-auto px-[15px] flex flex-col items-center">
+          <h2 className="main-title">
+            Let&apos;s get creative!<br />Art classes for all
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {(homepage?.whyChooseUsItems || defaultWhyItems).map((item, index) => (
-              <div key={index} className="text-center p-6">
-                <div className="w-16 h-16 mx-auto mb-4 bg-primary/20 rounded-full flex items-center justify-center">
-                  <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                <p className="text-gray-600">{item.description}</p>
+
+          <div className="flex flex-col lg:flex-row lg:items-stretch mt-[30px] lg:mt-[50px]">
+            {/* Block 1: Visual arts & creative classes */}
+            <div className="bg-white rounded-[40px] lg:rounded-[50px] shadow-[0_4px_20px_rgba(0,0,0,0.1)]
+                          p-[35px_20px] lg:p-[40px_30px] mr-0 lg:mr-[40px] mb-[25px] lg:mb-0 flex-1">
+              <div className="text-[18px] lg:text-[20px] font-semibold mb-[20px] lg:mb-[25px]">
+                Visual arts & creative classes
               </div>
-            ))}
+              <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
+                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                individual lessons
+              </div>
+              <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
+                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                group workshops for children and adults
+              </div>
+              <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
+                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                corporate events
+              </div>
+              <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-0 leading-[150%]">
+                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                courses in the visual arts for all levels of training and much more
+              </div>
+            </div>
+
+            {/* Block 2: Why me? */}
+            <div className="bg-white rounded-[40px] lg:rounded-[50px] shadow-[0_4px_20px_rgba(0,0,0,0.1)]
+                          p-[35px_20px] lg:p-[40px_30px] flex-1">
+              <div className="text-[18px] lg:text-[20px] font-semibold mb-[20px] lg:mb-[25px]">
+                Why me?
+              </div>
+              <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
+                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                professional experience teaching fine arts for over 12 years
+              </div>
+              <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
+                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                friendly and inspiring atmosphere at the classes
+              </div>
+              <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
+                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                provision of high quality materials
+              </div>
+              <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
+                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                individual approach to each student
+              </div>
+              <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
+                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                flexible schedule
+              </div>
+              <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-0 leading-[150%]">
+                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                convenient location
+              </div>
+            </div>
           </div>
+
+          <a href="#contact" className="main-button mt-[30px]">Contact us</a>
         </div>
       </section>
 
       {/* Upcoming Events Section */}
-      <section id="events" className="section">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl md:text-5xl font-serif text-center mb-4">
-            Upcoming Classes
+      <section id="events" className="section-spacing">
+        <div className="container mx-auto px-[15px]">
+          <h2 className="main-title mb-[30px] lg:mb-[50px]">
+            Upcoming events
           </h2>
-          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-            Join our creative workshops and discover the artist within you
-          </p>
           <EventCarousel events={events} onSignUp={handleSignUp} />
         </div>
       </section>
 
       {/* Regular Classes Section */}
       {regularEvents.length > 0 && (
-        <section className="section bg-gray-50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-4xl md:text-5xl font-serif text-center mb-12">
-              Regular Classes
+        <section className="section-spacing">
+          <div className="container mx-auto px-[15px]">
+            <h2 className="main-title mb-[30px] lg:mb-[50px]">
+              REGULAR ART CLASSES
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              {regularEvents.map((event) => (
-                <div key={event.id} className="card p-6">
-                  <h3 className="text-2xl font-serif mb-4">{event.title}</h3>
-                  <p className="text-gray-600 mb-4">{event.shortDescription}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-primary">
-                      ${event.price}
-                    </span>
-                    <button
-                      onClick={() => handleSignUp(event)}
-                      className="btn-primary"
-                    >
-                      Sign Up
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <EventCarousel events={regularEvents} onSignUp={handleSignUp} />
           </div>
         </section>
       )}
 
       {/* Gallery Section */}
-      <section className="section">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl md:text-5xl font-serif text-center mb-12">
-            Gallery
-          </h2>
+      <section className="section-spacing">
+        <div className="container mx-auto px-[15px] flex flex-col items-center">
+          <h2 className="main-title">GALLERY</h2>
           <Gallery
             studentArtworks={studentArtworks}
             instructorArtworks={instructorArtworks}
@@ -165,59 +160,86 @@ export default function HomePageClient({
         </div>
       </section>
 
-      {/* About Section */}
-      <section className="section bg-gradient-to-br from-orange-50 to-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-            {homepage?.aboutImage && (
-              <div className="relative h-[300px] md:h-[400px] rounded-3xl overflow-hidden">
-                <Image
-                  src={getStrapiMediaUrl(homepage.aboutImage)}
-                  alt="About"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            )}
-            <div>
-              <h2 className="text-4xl md:text-5xl font-serif mb-6">
-                {homepage?.aboutTitle || 'About Me'}
+      {/* About Section - V1 Style (text left, image right) */}
+      <section className="section-spacing">
+        <div className="container mx-auto px-[15px]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            {/* Text Left */}
+            <div className="text-center lg:text-left order-2 lg:order-1">
+              <h2 className="main-title text-center lg:text-left mb-[30px]">
+                {homepage?.aboutTitle || 'About me'}
               </h2>
               {homepage?.aboutText && (
                 <div
-                  className="prose prose-lg text-gray-600"
+                  className="text-[16px] lg:text-[17px] leading-[150%] [&>p]:mb-[12px] lg:[&>p]:mb-[15px]"
                   dangerouslySetInnerHTML={{ __html: homepage.aboutText }}
                 />
               )}
+            </div>
+            {/* Image Right */}
+            {homepage?.aboutImage && (
+              <div className="order-1 lg:order-2">
+                <Image
+                  src={getStrapiMediaUrl(homepage.aboutImage)}
+                  alt="About"
+                  width={600}
+                  height={600}
+                  className="w-full h-auto"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Subscribe CTA Section - V1 */}
+      <section
+        className="section-spacing h-[227px] flex items-center"
+        style={{
+          background: 'url(/assets/img/subscribe-to-the-newsletter.png) center no-repeat',
+          backgroundSize: 'cover'
+        }}
+      >
+        <div className="container mx-auto px-[15px]">
+          <div className="flex flex-col lg:flex-row items-center justify-between">
+            <div className="lg:w-3/4 text-center lg:text-left mb-3 lg:mb-0">
+              <span className="font-serif text-[38px] lg:text-[47px] font-bold leading-[90%]">
+                &ldquo;Escape the Ordinary – Paint Your Dreams!&rdquo;
+              </span>
+            </div>
+            <div className="lg:w-1/4 flex justify-center">
+              <a href="#events" className="main-button" style={{ width: '250px', height: '50px' }}>Events</a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      {faqs.length > 0 && (
-        <section className="section">
-          <div className="container mx-auto px-4">
-            <h2 className="text-4xl md:text-5xl font-serif text-center mb-12">
-              Frequently Asked Questions
-            </h2>
-            <FAQ faqs={faqs} />
-          </div>
-        </section>
-      )}
-
-      {/* Contact Section */}
-      <section className="section bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl md:text-5xl font-serif text-center mb-4">
-            Let&apos;s Get in Touch
-          </h2>
-          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-            Have questions? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
-          </p>
+      {/* Contact Section - V1 Style (image left, form right) */}
+      <section className="section-spacing" id="contact">
+        <div className="container mx-auto px-[15px]">
           <ContactForm />
         </div>
       </section>
+
+      {/* FAQ Section - V1 Style (title left, accordion right) */}
+      {faqs.length > 0 && (
+        <section className="section-spacing">
+          <div className="container mx-auto px-[15px]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Title Left */}
+              <div>
+                <h2 className="main-title !text-left mb-4 lg:mb-0">
+                  Frequently asked questions
+                </h2>
+              </div>
+              {/* Accordion Right */}
+              <div>
+                <FAQ faqs={faqs} />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Order Modal */}
       <OrderModal
@@ -229,18 +251,3 @@ export default function HomePageClient({
     </>
   );
 }
-
-const defaultWhyItems = [
-  {
-    title: 'Professional Instruction',
-    description: 'Learn from an experienced artist with years of teaching experience',
-  },
-  {
-    title: 'All Materials Included',
-    description: 'Everything you need is provided - just bring your creativity',
-  },
-  {
-    title: 'Small Group Classes',
-    description: 'Intimate setting ensures personalized attention for every student',
-  },
-];

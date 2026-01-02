@@ -118,7 +118,10 @@ export interface Event {
   title: string;
   slug: string;
   date: string;
-  time: string;
+  time?: string; // Legacy field for backwards compatibility
+  startTime?: string;
+  endTime?: string;
+  flexibleSchedule?: boolean;
   price: number;
   location: string;
   image: StrapiMedia;

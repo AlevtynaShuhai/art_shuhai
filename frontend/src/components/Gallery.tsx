@@ -28,56 +28,126 @@ export default function Gallery({ studentArtworks, instructorArtworks }: Gallery
     setLightboxOpen(true);
   };
 
+  // Get first 4 artworks for the asymmetric grid (V1 style)
+  const gridArtworks = currentArtworks.slice(0, 4);
+
   return (
-    <div>
-      {/* Tab Buttons */}
-      <div className="flex justify-center gap-4 mb-8">
+    <div className="w-full">
+      {/* Tab Buttons - V1 Style */}
+      <div className="flex flex-col lg:flex-row justify-center mt-[30px] lg:mt-[50px] mb-[30px]">
         <button
           onClick={() => setActiveTab('student')}
-          className={`px-6 py-2 rounded-full font-medium transition-all ${
-            activeTab === 'student'
-              ? 'bg-primary text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
+          className={`w-[290px] lg:w-[239px] h-[45px] border border-[#FFC98B]
+                      rounded-[90px] lg:rounded-l-[90px] lg:rounded-r-none
+                      text-[22px] font-normal mb-3 lg:mb-0 transition-all
+                      ${activeTab === 'student' ? 'bg-[#FFC98B] border-[#FFC98B]' : 'bg-transparent hover:bg-[#FFC98B]/20'}`}
         >
-          Student Artworks
+          student artwork
         </button>
         <button
           onClick={() => setActiveTab('instructor')}
-          className={`px-6 py-2 rounded-full font-medium transition-all ${
-            activeTab === 'instructor'
-              ? 'bg-primary text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
+          className={`w-[290px] lg:w-[239px] h-[45px] border border-[#FFC98B]
+                      rounded-[90px] lg:rounded-r-[90px] lg:rounded-l-none
+                      text-[22px] font-normal transition-all
+                      ${activeTab === 'instructor' ? 'bg-[#FFC98B] border-[#FFC98B]' : 'bg-transparent hover:bg-[#FFC98B]/20'}`}
         >
-          Instructor Artworks
+          my artwork
         </button>
       </div>
 
-      {/* Gallery Grid */}
+      {/* Gallery Grid - V1 Asymmetric Layout */}
       {currentArtworks.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {currentArtworks.map((artwork, index) => (
-            <div
-              key={artwork.id}
-              className="relative aspect-square rounded-2xl overflow-hidden cursor-pointer group"
-              onClick={() => openLightbox(index)}
-            >
-              <Image
-                src={getStrapiMediaUrl(artwork.image)}
-                alt={artwork.title || 'Artwork'}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                </svg>
+        <>
+          {/* Desktop: Asymmetric grid */}
+          <div className="hidden lg:grid gap-[25px]" style={{
+            gridTemplateAreas: `
+              "photo1 photo2 photo3"
+              "photo4 photo4 photo3"
+            `,
+            gridTemplateColumns: '1fr 1fr 1fr',
+            gridTemplateRows: '300px 300px'
+          }}>
+            {gridArtworks[0] && (
+              <div
+                style={{ gridArea: 'photo1' }}
+                className="relative rounded-[20px] overflow-hidden cursor-pointer group"
+                onClick={() => openLightbox(0)}
+              >
+                <Image
+                  src={getStrapiMediaUrl(gridArtworks[0].image)}
+                  alt={gridArtworks[0].title || 'Artwork'}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
               </div>
-            </div>
-          ))}
-        </div>
+            )}
+            {gridArtworks[1] && (
+              <div
+                style={{ gridArea: 'photo2' }}
+                className="relative rounded-[20px] overflow-hidden cursor-pointer group"
+                onClick={() => openLightbox(1)}
+              >
+                <Image
+                  src={getStrapiMediaUrl(gridArtworks[1].image)}
+                  alt={gridArtworks[1].title || 'Artwork'}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+              </div>
+            )}
+            {gridArtworks[2] && (
+              <div
+                style={{ gridArea: 'photo3' }}
+                className="relative rounded-[20px] overflow-hidden cursor-pointer group"
+                onClick={() => openLightbox(2)}
+              >
+                <Image
+                  src={getStrapiMediaUrl(gridArtworks[2].image)}
+                  alt={gridArtworks[2].title || 'Artwork'}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+              </div>
+            )}
+            {gridArtworks[3] && (
+              <div
+                style={{ gridArea: 'photo4' }}
+                className="relative rounded-[20px] overflow-hidden cursor-pointer group"
+                onClick={() => openLightbox(3)}
+              >
+                <Image
+                  src={getStrapiMediaUrl(gridArtworks[3].image)}
+                  alt={gridArtworks[3].title || 'Artwork'}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+              </div>
+            )}
+          </div>
+
+          {/* Mobile: Single column */}
+          <div className="lg:hidden flex flex-col gap-[15px]">
+            {gridArtworks.map((artwork, index) => (
+              <div
+                key={artwork.id}
+                className="relative aspect-[4/3] rounded-[20px] overflow-hidden cursor-pointer group"
+                onClick={() => openLightbox(index)}
+              >
+                <Image
+                  src={getStrapiMediaUrl(artwork.image)}
+                  alt={artwork.title || 'Artwork'}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+              </div>
+            ))}
+          </div>
+        </>
       ) : (
         <div className="text-center py-12 text-gray-500">
           No artworks available at the moment.

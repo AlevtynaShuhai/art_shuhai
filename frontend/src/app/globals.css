@@ -26,9 +26,16 @@ body {
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
 
+/* V1 Container max-width - applies at large screens like Bootstrap */
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1140px;
+  }
+}
+
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-serif), 'Cormorant Garamond', serif;
 }
 
 /* Custom scrollbar */
@@ -49,7 +56,44 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--primary-dark);
 }
 
-/* Button styles */
+/* V1 Main Button style */
+.main-button {
+  width: 280px;
+  height: 60px;
+  border-radius: 80px;
+  background: #FFB785;
+  color: black;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 120%;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+@media (max-width: 991px) {
+  .main-button {
+    width: 220px;
+    height: 45px;
+    font-size: 18px;
+  }
+}
+
+.main-button:hover {
+  background: #FFA769;
+}
+
+.main-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Button styles (legacy) */
 .btn-primary {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
@@ -86,7 +130,18 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
-/* Section spacing */
+/* V1 Section spacing (mb-200) */
+.section-spacing {
+  margin-bottom: 200px;
+}
+
+@media (max-width: 991px) {
+  .section-spacing {
+    margin-bottom: 80px;
+  }
+}
+
+/* Section padding (legacy) */
 .section {
   padding: 80px 0;
 }
@@ -106,6 +161,22 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 480px) {
   .section {
     padding: 40px 0;
+  }
+}
+
+/* V1 Main Title */
+.main-title {
+  font-family: var(--font-serif), 'Cormorant Garamond', serif;
+  font-size: 70px;
+  font-weight: 700;
+  line-height: 105%;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+@media (max-width: 991px) {
+  .main-title {
+    font-size: 45px;
   }
 }
 
@@ -155,4 +226,17 @@ h1, h2, h3, h4, h5, h6 {
 
 .swiper-pagination-bullet-active {
   background: var(--primary) !important;
+}
+
+/* V1 Banner Section */
+.banner {
+  background: url('/assets/img/bg-main-banner.webp') center bottom no-repeat;
+  background-size: cover;
+}
+
+@media (max-width: 991px) {
+  .banner {
+    background: url('/assets/img/bg-mobile-banner.webp') center bottom no-repeat;
+    background-size: cover;
+  }
 }

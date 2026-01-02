@@ -55,7 +55,7 @@ export default async function HomePage() {
     <>
       <Header settings={data.settings || undefined} />
 
-      <main className="pt-20">
+      <main>
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
           <HomePageClient
             events={data.events}
