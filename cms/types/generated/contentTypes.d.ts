@@ -480,9 +480,12 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     date: Schema.Attribute.Date & Schema.Attribute.Required;
     discount: Schema.Attribute.String;
+    endTime: Schema.Attribute.Time;
     eventType: Schema.Attribute.Enumeration<['one-time', 'regular']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'one-time'>;
+    flexibleSchedule: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     fullDescription: Schema.Attribute.RichText;
     image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
     includes: Schema.Attribute.JSON;
@@ -495,7 +498,8 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     shortDescription: Schema.Attribute.Text;
     slug: Schema.Attribute.UID<'title'>;
-    time: Schema.Attribute.String & Schema.Attribute.Required;
+    startTime: Schema.Attribute.Time;
+    time: Schema.Attribute.String;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

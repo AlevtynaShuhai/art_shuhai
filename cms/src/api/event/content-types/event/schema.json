@@ -25,8 +25,17 @@
       "required": true
     },
     "time": {
-      "type": "string",
-      "required": true
+      "type": "string"
+    },
+    "startTime": {
+      "type": "time"
+    },
+    "endTime": {
+      "type": "time"
+    },
+    "flexibleSchedule": {
+      "type": "boolean",
+      "default": false
     },
     "price": {
       "type": "decimal",
