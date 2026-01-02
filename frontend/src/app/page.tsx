@@ -8,44 +8,39 @@ import HomePageClient from './HomePageClient';
 export const revalidate = 300;
 
 async function getData() {
-  try {
-    const [eventsRes, studentArtworks, instructorArtworks, faqsRes, homepageRes, settingsRes] = await Promise.all([
-      getEvents({ populate: '*', sort: ['date:asc'] }),
-      getArtworks('student'),
-      getArtworks('instructor'),
-      getFAQs(),
-      getHomepage(),
-      getSettings(),
-    ]);
+  const [eventsRes, studentArtworks, instructorArtworks, faqsRes, homepageRes, settingsRes] = await Promise.all([
+    getEvents({ populate: '*', sort: ['date:asc'] }),
+    getArtworks('student'),
+    getArtworks('instructor'),
+    getFAQs(),
+    getHomepage(),
+    getSettings(),
+  ]);
 
-    // Filter out past events
-    const now = new Date();
-    const activeEvents = eventsRes.data.filter((event: Event) => {
-      const eventDate = new Date(event.date);
-      return eventDate >= now && event.isActive;
-    });
+  // Handle null responses (Strapi not available)
+  const events = eventsRes?.data || [];
+  const allStudentArtworks = studentArtworks?.data || [];
+  const allInstructorArtworks = instructorArtworks?.data || [];
+  const faqs = faqsRes?.data || [];
+  const homepage = homepageRes?.data || null;
+  const settings = settingsRes?.data || null;
 
-    return {
-      events: activeEvents,
-      regularEvents: eventsRes.data.filter((e: Event) => e.eventType === 'regular'),
-      studentArtworks: studentArtworks.data,
-      instructorArtworks: instructorArtworks.data,
-      faqs: faqsRes.data,
-      homepage: homepageRes.data,
-      settings: settingsRes.data,
-    };
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    return {
-      events: [],
-      regularEvents: [],
-      studentArtworks: [],
-      instructorArtworks: [],
-      faqs: [],
-      homepage: null,
-      settings: null,
-    };
-  }
+  // Filter out past events
+  const now = new Date();
+  const activeEvents = events.filter((event: Event) => {
+    const eventDate = new Date(event.date);
+    return eventDate >= now && event.isActive;
+  });
+
+  return {
+    events: activeEvents,
+    regularEvents: events.filter((e: Event) => e.eventType === 'regular'),
+    studentArtworks: allStudentArtworks,
+    instructorArtworks: allInstructorArtworks,
+    faqs,
+    homepage,
+    settings,
+  };
 }
 
 export default async function HomePage() {

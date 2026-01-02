@@ -16,7 +16,8 @@ export default function Gallery({ studentArtworks, instructorArtworks }: Gallery
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  const currentArtworks = activeTab === 'student' ? studentArtworks : instructorArtworks;
+  const currentArtworks = (activeTab === 'student' ? studentArtworks : instructorArtworks)
+    .filter(artwork => artwork.image); // Filter out artworks without images
 
   const slides = currentArtworks.map((artwork) => ({
     src: getStrapiMediaUrl(artwork.image),

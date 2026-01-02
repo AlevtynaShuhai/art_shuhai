@@ -21,23 +21,32 @@ interface StrapiSingleResponse<T> {
 async function fetchStrapi<T>(
   endpoint: string,
   options: RequestInit = {}
-): Promise<T> {
+): Promise<T | null> {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...(STRAPI_TOKEN && { Authorization: `Bearer ${STRAPI_TOKEN}` }),
     ...options.headers,
   };
 
-  const response = await fetch(`${STRAPI_URL}/api${endpoint}`, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(`${STRAPI_URL}/api${endpoint}`, {
+      ...options,
+      headers,
+    });
 
-  if (!response.ok) {
-    throw new Error(`Strapi API error: ${response.status} ${response.statusText}`);
+    if (!response.ok) {
+      console.error(`Strapi API error: ${response.status} ${response.statusText}`);
+      return null;
+    }
+
+    return response.json();
+  } catch (error) {
+    // Handle connection errors (e.g., Strapi not running)
+    if (error instanceof Error) {
+      console.warn(`Strapi connection failed: ${error.message}. Using fallback data.`);
+    }
+    return null;
   }
-
-  return response.json();
 }
 
 // Events
@@ -247,7 +256,7 @@ interface StrapiMediaFormat {
 
 // Helper to get full media URL
 export function getStrapiMediaUrl(media?: StrapiMedia): string {
-  if (!media) return '';
+  if (!media || !media.url) return '/assets/img/placeholder.svg';
   if (media.url.startsWith('http')) return media.url;
   return `${STRAPI_URL}${media.url}`;
 }

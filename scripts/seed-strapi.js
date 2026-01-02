@@ -51,32 +51,59 @@ async function uploadFile(filePath, fileName) {
     return null;
   }
 
-  const form = new FormData();
-  const fileBuffer = fs.readFileSync(fullPath);
   const name = fileName || path.basename(filePath);
+  const fileStream = fs.createReadStream(fullPath);
+  const stats = fs.statSync(fullPath);
 
-  form.append('files', fileBuffer, {
+  const form = new FormData();
+  form.append('files', fileStream, {
     filename: name,
     contentType: getContentType(name),
+    knownLength: stats.size,
   });
 
-  const response = await fetch(`${STRAPI_URL}/api/upload`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${STRAPI_TOKEN}`,
-      ...form.getHeaders(),
-    },
-    body: form,
+  return new Promise((resolve) => {
+    form.submit(
+      {
+        protocol: 'http:',
+        host: 'localhost',
+        port: 1337,
+        path: '/api/upload',
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${STRAPI_TOKEN}`,
+        },
+      },
+      (err, res) => {
+        if (err) {
+          console.warn(`  Warning: Failed to upload ${filePath}: ${err.message}`);
+          resolve(null);
+          return;
+        }
+
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => {
+          try {
+            const result = JSON.parse(data);
+            if (Array.isArray(result) && result.length > 0 && result[0].id) {
+              // Success - got uploaded file data
+              resolve(result[0]);
+            } else if (result.error) {
+              console.warn(`  Warning: Failed to upload ${filePath}: ${result.error.message}`);
+              resolve(null);
+            } else {
+              console.warn(`  Warning: Unexpected response for ${filePath}`);
+              resolve(null);
+            }
+          } catch {
+            console.warn(`  Warning: Failed to parse upload response: ${data}`);
+            resolve(null);
+          }
+        });
+      }
+    );
   });
-
-  if (!response.ok) {
-    const error = await response.text();
-    console.warn(`  Warning: Failed to upload ${filePath}: ${error}`);
-    return null;
-  }
-
-  const result = await response.json();
-  return result[0]; // Returns first uploaded file
 }
 
 // Get content type from filename
@@ -99,7 +126,8 @@ const events = [
     title: 'Wine Painting Class',
     slug: 'wine-painting-class',
     date: '2026-01-07',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -113,7 +141,8 @@ const events = [
     title: 'Spirit Island in Watercolor',
     slug: 'spirit-island-watercolor',
     date: '2026-01-09',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -127,7 +156,8 @@ const events = [
     title: 'Sunset Glow Acrylic Class',
     slug: 'sunset-glow-acrylic',
     date: '2026-01-14',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -141,7 +171,8 @@ const events = [
     title: 'Quiet Moment Acrylic Class',
     slug: 'quiet-moment-acrylic',
     date: '2026-01-19',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -155,7 +186,8 @@ const events = [
     title: 'Edge of Summer Acrylic Class',
     slug: 'edge-of-summer-acrylic',
     date: '2026-01-21',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -169,7 +201,8 @@ const events = [
     title: 'Acrylic Peyto Lake Landscape',
     slug: 'peyto-lake-landscape',
     date: '2026-01-23',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -183,7 +216,8 @@ const events = [
     title: 'Frost and Sun in Watercolor',
     slug: 'frost-sun-watercolor',
     date: '2026-01-28',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -197,7 +231,8 @@ const events = [
     title: 'Your Pet Acrylic Portrait',
     slug: 'pet-acrylic-portrait',
     date: '2026-01-30',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -211,7 +246,8 @@ const events = [
     title: 'Citrus Therapy Acrylic Class',
     slug: 'citrus-therapy-acrylic',
     date: '2026-02-04',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -225,7 +261,8 @@ const events = [
     title: 'Into the Rockies Acrylic Class',
     slug: 'into-rockies-acrylic',
     date: '2026-02-06',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -239,7 +276,8 @@ const events = [
     title: 'Winter on Fire Acrylic Class',
     slug: 'winter-on-fire-acrylic',
     date: '2026-02-11',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -253,7 +291,8 @@ const events = [
     title: 'Beyond Today Acrylic Class',
     slug: 'beyond-today-acrylic',
     date: '2026-02-13',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -267,7 +306,8 @@ const events = [
     title: 'Silent Light Acrylic Class',
     slug: 'silent-light-acrylic',
     date: '2026-02-18',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -281,7 +321,8 @@ const events = [
     title: 'February Watercolor Class',
     slug: 'february-watercolor',
     date: '2026-02-20',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -295,7 +336,8 @@ const events = [
     title: 'Echoes of Flame Acrylic Class',
     slug: 'echoes-flame-acrylic',
     date: '2026-02-25',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -309,7 +351,8 @@ const events = [
     title: 'Awaiting Spring Acrylic Class',
     slug: 'awaiting-spring-acrylic',
     date: '2026-02-27',
-    time: '6:00 pm - 9:00 pm',
+    startTime: '18:00:00',
+    endTime: '21:00:00',
     price: 78,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'Beginner-friendly. All supplies provided + snacks and beverages',
@@ -324,7 +367,8 @@ const events = [
     title: 'Regular Art Classes for Adults',
     slug: 'regular-art-classes-adults',
     date: '2026-01-11', // First Saturday
-    time: '3:00 pm - 6:00 pm',
+    startTime: '15:00:00',
+    endTime: '18:00:00',
     price: 231,
     location: '1324 11 Ave SW, #202, Calgary',
     shortDescription: 'All supplies provided',
@@ -339,7 +383,7 @@ const events = [
     title: 'Private Art Classes',
     slug: 'private-art-classes',
     date: '2026-01-06', // Monday
-    time: 'Flexible schedule',
+    flexibleSchedule: true,
     price: 75,
     location: 'IN ART Studio, 1324 11 Ave SW, #202, Calgary',
     shortDescription: 'All supplies provided',
@@ -446,7 +490,6 @@ async function seed() {
         title: event.title,
         slug: event.slug,
         date: event.date,
-        time: event.time,
         price: event.price,
         location: event.location,
         shortDescription: event.shortDescription,
@@ -454,6 +497,9 @@ async function seed() {
         includes: event.includes,
         eventType: event.eventType,
         isActive: event.isActive,
+        ...(event.startTime && { startTime: event.startTime }),
+        ...(event.endTime && { endTime: event.endTime }),
+        ...(event.flexibleSchedule && { flexibleSchedule: event.flexibleSchedule }),
         ...(event.discount && { discount: event.discount }),
         ...(image && { image: image.id }),
       };
