@@ -1,0 +1,15 @@
+{
+  "collectionName": "components_event_include_items",
+  "info": {
+    "displayName": "Include Item",
+    "icon": "check",
+    "description": "Single item in What's Included list"
+  },
+  "options": {},
+  "attributes": {
+    "text": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

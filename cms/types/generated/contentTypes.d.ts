@@ -488,7 +488,7 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
       Schema.Attribute.DefaultTo<false>;
     fullDescription: Schema.Attribute.RichText;
     image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
-    includes: Schema.Attribute.JSON;
+    includes: Schema.Attribute.Component<'event.include-item', true>;
     isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::event.event'> &

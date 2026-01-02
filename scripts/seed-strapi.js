@@ -494,7 +494,7 @@ async function seed() {
         location: event.location,
         shortDescription: event.shortDescription,
         fullDescription: event.fullDescription,
-        includes: event.includes,
+        includes: event.includes.map(text => ({ text })),
         eventType: event.eventType,
         isActive: event.isActive,
         ...(event.startTime && { startTime: event.startTime }),

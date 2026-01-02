@@ -136,7 +136,7 @@ export interface Event {
   image: StrapiMedia;
   shortDescription: string;
   fullDescription: string;
-  includes: string[];
+  includes: Array<{ id: number; text: string }>;
   discount?: string;
   eventType: 'one-time' | 'regular';
   isActive: boolean;

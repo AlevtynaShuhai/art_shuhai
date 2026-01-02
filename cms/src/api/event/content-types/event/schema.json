@@ -58,7 +58,9 @@
       "type": "richtext"
     },
     "includes": {
-      "type": "json"
+      "type": "component",
+      "repeatable": true,
+      "component": "event.include-item"
     },
     "discount": {
       "type": "string"
