@@ -45,6 +45,9 @@ export async function POST(request: NextRequest) {
       isSubscribed: validatedData.isSubscribed,
     });
 
+    if (!leadResponse?.data?.id) {
+      throw new Error('Failed to create lead in Strapi');
+    }
     const leadId = leadResponse.data.id;
 
     // Create Stripe checkout session
