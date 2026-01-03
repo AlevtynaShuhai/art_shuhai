@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createCheckoutSession } from '@/lib/stripe';
 import { createLead } from '@/lib/strapi';
-import { sendNewOrderNotification } from '@/lib/telegram';
 import { addSubscriber } from '@/lib/googleSheets';
 import crypto from 'crypto';
 
@@ -11,7 +10,7 @@ const checkoutSchema = z.object({
   email: z.string().email('Invalid email'),
   phone: z.string().optional(),
   message: z.string().optional(),
-  eventId: z.number().optional(),
+  eventId: z.string().optional(), // documentId in Strapi v5
   eventName: z.string(),
   eventDate: z.string(),
   eventTime: z.string(),
@@ -64,19 +63,6 @@ export async function POST(request: NextRequest) {
       leadId,
       securityNonce,
     });
-
-    // Send Telegram notification (async, don't wait)
-    sendNewOrderNotification({
-      name: validatedData.name,
-      email: validatedData.email,
-      phone: validatedData.phone,
-      message: validatedData.message,
-      eventName: validatedData.eventName,
-      eventDate: validatedData.eventDate,
-      eventTime: validatedData.eventTime,
-      eventPrice: validatedData.eventPrice,
-      eventLocation: validatedData.eventLocation,
-    }).catch(console.error);
 
     // Add to Google Sheets if subscribed (async, don't wait)
     if (validatedData.isSubscribed) {

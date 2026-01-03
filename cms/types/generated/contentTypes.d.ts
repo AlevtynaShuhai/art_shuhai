@@ -587,9 +587,11 @@ export interface ApiLeadLead extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
+    amountPaid: Schema.Attribute.Decimal;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    currency: Schema.Attribute.String & Schema.Attribute.DefaultTo<'cad'>;
     email: Schema.Attribute.Email & Schema.Attribute.Required;
     event: Schema.Attribute.Relation<'manyToOne', 'api::event.event'>;
     eventDate: Schema.Attribute.String;
@@ -603,6 +605,12 @@ export interface ApiLeadLead extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     message: Schema.Attribute.Text;
     name: Schema.Attribute.String & Schema.Attribute.Required;
+    notes: Schema.Attribute.Text;
+    orderStatus: Schema.Attribute.Enumeration<
+      ['new', 'viewed', 'confirmed', 'completed', 'cancelled']
+    > &
+      Schema.Attribute.DefaultTo<'new'>;
+    paidAt: Schema.Attribute.DateTime;
     paymentStatus: Schema.Attribute.Enumeration<
       ['pending', 'paid', 'failed', 'refunded']
     > &
@@ -610,9 +618,10 @@ export interface ApiLeadLead extends Struct.CollectionTypeSchema {
     phone: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     securityNonce: Schema.Attribute.String;
+    stripeChargeId: Schema.Attribute.String;
     stripePaymentIntent: Schema.Attribute.String;
+    stripeReceiptUrl: Schema.Attribute.String;
     stripeSessionId: Schema.Attribute.String;
-    telegramSent: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

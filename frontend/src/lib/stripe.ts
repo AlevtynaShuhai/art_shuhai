@@ -86,6 +86,12 @@ export async function retrieveSession(sessionId: string) {
   return getStripe().checkout.sessions.retrieve(sessionId);
 }
 
+export async function retrievePaymentIntent(paymentIntentId: string) {
+  return getStripe().paymentIntents.retrieve(paymentIntentId, {
+    expand: ['latest_charge'],
+  });
+}
+
 export function constructWebhookEvent(
   payload: string | Buffer,
   signature: string,

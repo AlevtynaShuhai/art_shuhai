@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createLead } from '@/lib/strapi';
-import { sendContactFormNotification } from '@/lib/telegram';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name is required'),
@@ -20,13 +19,6 @@ export async function POST(request: NextRequest) {
       email: validatedData.email,
       message: validatedData.message,
       paymentStatus: 'pending', // Not a payment, just contact
-    });
-
-    // Send Telegram notification
-    await sendContactFormNotification({
-      name: validatedData.name,
-      email: validatedData.email,
-      message: validatedData.message,
     });
 
     return NextResponse.json({ success: true });

@@ -42,6 +42,9 @@ cms/.strapi
 cms/exports/
 cms/public/uploads/*
 !cms/public/uploads/.gitkeep
+cms/database/
+cms/*.db
+cms/*.db-journal
 
 # Backup files
 *.tar.gz

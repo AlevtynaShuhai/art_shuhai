@@ -106,9 +106,18 @@ export async function getSettings() {
 
 // Leads (Create)
 export async function createLead(data: CreateLeadInput) {
+  // Format data for Strapi v5 relations
+  const { event, ...rest } = data;
+  const formattedData: Record<string, unknown> = { ...rest };
+
+  // Connect event relation using documentId
+  if (event) {
+    formattedData.event = { connect: [event] };
+  }
+
   return fetchStrapi<StrapiSingleResponse<Lead>>('/leads', {
     method: 'POST',
-    body: JSON.stringify({ data }),
+    body: JSON.stringify({ data: formattedData }),
   });
 }
 
@@ -177,11 +186,17 @@ export interface Lead {
   eventPrice?: number;
   eventLocation?: string;
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
+  orderStatus: 'new' | 'viewed' | 'confirmed' | 'completed' | 'cancelled';
   stripeSessionId?: string;
   stripePaymentIntent?: string;
+  stripeChargeId?: string;
+  stripeReceiptUrl?: string;
+  amountPaid?: number;
+  currency?: string;
+  paidAt?: string;
   securityNonce?: string;
-  telegramSent: boolean;
   isSubscribed: boolean;
+  notes?: string;
 }
 
 export interface CreateLeadInput {
@@ -189,7 +204,7 @@ export interface CreateLeadInput {
   phone?: string;
   email: string;
   message?: string;
-  event?: number;
+  event?: string; // documentId in Strapi v5
   eventName?: string;
   eventDate?: string;
   eventTime?: string;

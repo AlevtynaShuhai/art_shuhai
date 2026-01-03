@@ -90,7 +90,7 @@ export default function OrderModal({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...data,
-          eventId: event.id,
+          eventId: event.documentId,
           eventName: event.title,
           eventDate: formatDate(event.date),
           eventTime: getTimeDisplay(),

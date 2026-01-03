@@ -51,22 +51,42 @@
       "enum": ["pending", "paid", "failed", "refunded"],
       "default": "pending"
     },
+    "orderStatus": {
+      "type": "enumeration",
+      "enum": ["new", "viewed", "confirmed", "completed", "cancelled"],
+      "default": "new"
+    },
     "stripeSessionId": {
       "type": "string"
     },
     "stripePaymentIntent": {
       "type": "string"
     },
-    "securityNonce": {
+    "stripeChargeId": {
       "type": "string"
     },
-    "telegramSent": {
-      "type": "boolean",
-      "default": false
+    "stripeReceiptUrl": {
+      "type": "string"
+    },
+    "amountPaid": {
+      "type": "decimal"
+    },
+    "currency": {
+      "type": "string",
+      "default": "cad"
+    },
+    "paidAt": {
+      "type": "datetime"
+    },
+    "securityNonce": {
+      "type": "string"
     },
     "isSubscribed": {
       "type": "boolean",
       "default": false
+    },
+    "notes": {
+      "type": "text"
     }
   }
 }

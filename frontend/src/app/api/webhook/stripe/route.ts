@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { constructWebhookEvent } from '@/lib/stripe';
+import { constructWebhookEvent, retrievePaymentIntent } from '@/lib/stripe';
 import { updateLead } from '@/lib/strapi';
-import { sendPaymentSuccessNotification } from '@/lib/telegram';
 import type Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -80,25 +79,36 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   }
 
   const leadId = parseInt(metadata.leadId, 10);
+  const paymentIntentId = session.payment_intent as string;
 
-  // Update lead status
+  // Get payment intent with charge details
+  let chargeId: string | undefined;
+  let receiptUrl: string | undefined;
+
+  if (paymentIntentId) {
+    try {
+      const paymentIntent = await retrievePaymentIntent(paymentIntentId);
+      const charge = paymentIntent.latest_charge as Stripe.Charge;
+      if (charge) {
+        chargeId = charge.id;
+        receiptUrl = charge.receipt_url || undefined;
+      }
+    } catch (err) {
+      console.error('Failed to retrieve payment intent:', err);
+    }
+  }
+
+  // Update lead with full transaction details
   await updateLead(leadId, {
     paymentStatus: 'paid',
+    orderStatus: 'new',
     stripeSessionId: session.id,
-    stripePaymentIntent: session.payment_intent as string,
-    telegramSent: true,
-  });
-
-  // Send success notification
-  await sendPaymentSuccessNotification({
-    name: metadata.customerName || 'Unknown',
-    email: metadata.customerEmail || 'Unknown',
-    phone: metadata.customerPhone,
-    eventName: metadata.eventName || 'Unknown',
-    eventDate: metadata.eventDate || 'Unknown',
-    eventTime: metadata.eventTime || 'Unknown',
-    eventPrice: parseFloat(session.amount_total?.toString() || '0') / 100,
-    eventLocation: metadata.eventLocation || 'Unknown',
+    stripePaymentIntent: paymentIntentId,
+    stripeChargeId: chargeId,
+    stripeReceiptUrl: receiptUrl,
+    amountPaid: (session.amount_total || 0) / 100,
+    currency: session.currency || 'cad',
+    paidAt: new Date().toISOString(),
   });
 }
 
@@ -110,6 +120,7 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
 
   await updateLead(leadId, {
     paymentStatus: 'failed',
+    orderStatus: 'cancelled',
     stripeSessionId: session.id,
   });
 }
