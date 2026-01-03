@@ -34,10 +34,12 @@ COPY --from=builder --chown=strapi:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=strapi:nodejs /app/public ./public
 COPY --from=builder --chown=strapi:nodejs /app/config ./config
 COPY --from=builder --chown=strapi:nodejs /app/src ./src
+COPY --from=builder --chown=strapi:nodejs /app/database ./database
 COPY --from=builder --chown=strapi:nodejs /app/tsconfig.json ./tsconfig.json
 
-# Create uploads directory
-RUN mkdir -p /app/public/uploads && chown -R strapi:nodejs /app/public/uploads
+# Create necessary directories with proper permissions
+RUN mkdir -p /app/public/uploads /app/database/migrations /app/.tmp && \
+    chown -R strapi:nodejs /app/public/uploads /app/database /app/.tmp
 
 USER strapi
 
