@@ -13,6 +13,16 @@ const nextConfig: NextConfig = {
         pathname: '/uploads/**',
       },
       {
+        protocol: 'http',
+        hostname: '*.sslip.io',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.sslip.io',
+        pathname: '/uploads/**',
+      },
+      {
         protocol: 'https',
         hostname: '**',
         pathname: '/uploads/**',
