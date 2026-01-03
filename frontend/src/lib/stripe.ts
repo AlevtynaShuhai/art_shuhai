@@ -1,13 +1,20 @@
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing STRIPE_SECRET_KEY environment variable');
-}
+// Lazy initialization to avoid build-time errors
+let stripeInstance: Stripe | null = null;
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-12-15.clover',
-  typescript: true,
-});
+function getStripe(): Stripe {
+  if (!stripeInstance) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('Missing STRIPE_SECRET_KEY environment variable');
+    }
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-12-15.clover',
+      typescript: true,
+    });
+  }
+  return stripeInstance;
+}
 
 export interface CreateCheckoutSessionParams {
   eventName: string;
@@ -38,7 +45,7 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
     securityNonce,
   } = params;
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
     payment_method_types: ['card'],
     mode: 'payment',
     currency: 'cad',
@@ -76,7 +83,7 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
 }
 
 export async function retrieveSession(sessionId: string) {
-  return stripe.checkout.sessions.retrieve(sessionId);
+  return getStripe().checkout.sessions.retrieve(sessionId);
 }
 
 export function constructWebhookEvent(
@@ -84,5 +91,5 @@ export function constructWebhookEvent(
   signature: string,
   webhookSecret: string
 ) {
-  return stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+  return getStripe().webhooks.constructEvent(payload, signature, webhookSecret);
 }
