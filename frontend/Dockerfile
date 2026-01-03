@@ -7,7 +7,8 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci
+# Install ALL dependencies including devDependencies (needed for TypeScript build)
+RUN npm ci --include=dev
 
 # Rebuild the source code only when needed
 FROM base AS builder
