@@ -10,7 +10,7 @@ const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email'),
   phone: z.string().optional(),
-  message: z.string().min(1, 'Please add a message'),
+  message: z.string().optional(),
   isSubscribed: z.boolean(),
 });
 
@@ -85,6 +85,11 @@ export default function OrderModal({
     setError(null);
 
     try {
+      // Use discount price if available and lower than regular price
+      const actualPrice = (event.discount && Number(event.discount) < Number(event.price))
+        ? Number(event.discount)
+        : Number(event.price);
+
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -94,7 +99,7 @@ export default function OrderModal({
           eventName: event.title,
           eventDate: formatDate(event.date),
           eventTime: getTimeDisplay(),
-          eventPrice: event.price,
+          eventPrice: actualPrice,
           eventLocation: event.location,
         }),
       });
@@ -137,9 +142,9 @@ export default function OrderModal({
       {/* Modal */}
       <div className="fixed inset-0 overflow-y-auto">
         <div className="flex min-h-full items-center justify-center p-4">
-          <div className="relative bg-white rounded-lg w-full max-w-[800px] shadow-xl">
+          <div className="relative bg-white rounded-lg w-full max-w-[500px] lg:max-w-[900px] shadow-xl">
             {/* Header */}
-            <div className="relative flex justify-center pt-[50px] lg:pt-[50px]">
+            <div className="relative flex justify-center pt-[30px] lg:pt-[50px]">
               {/* Close Button - V1 style */}
               <button
                 onClick={handleClose}
@@ -152,174 +157,198 @@ export default function OrderModal({
               </button>
 
               {/* Title */}
-              <h2 className="font-serif text-[36px] lg:text-[42px] font-normal leading-[115%] text-center mb-[20px] lg:mb-[25px] px-[40px]">
+              <h2 className="font-serif text-[26px] lg:text-[42px] font-normal leading-[115%] text-center mb-[15px] lg:mb-[25px] px-[20px] lg:px-[40px]">
                 {isRegularClass ? 'Sign up for the regular classes' : 'Sign up for the art class'}
               </h2>
             </div>
 
-            {/* Body */}
-            <div className="px-[15px] lg:px-[40px] pb-[60px] lg:pb-[50px]">
-              {/* Description */}
-              {event.modalDescription && (
-                <div
-                  className="text-[16px] lg:text-[15px] leading-[150%] mb-4"
-                  dangerouslySetInnerHTML={{ __html: event.modalDescription }}
-                />
-              )}
-
-              {/* Event Information */}
-              <div className="flex items-center gap-2 text-[16px] lg:text-[15px] leading-[150%] mb-[8px] lg:mb-[7px]">
-                <img src="/assets/img/icon-date.svg" alt="" />
-                Date: {formatDate(event.date)}
-              </div>
-              <div className="flex items-center gap-2 text-[16px] lg:text-[15px] leading-[150%] mb-[8px] lg:mb-[7px]">
-                <img src="/assets/img/icon_time.svg" alt="" />
-                Time: {getTimeDisplay()}
-              </div>
-              <div className="flex items-center gap-2 text-[16px] lg:text-[15px] leading-[150%] mb-0">
-                <img src="/assets/img/icon-location.svg" alt="" />
-                Location: {event.location}
-              </div>
-
-              {/* What's Included */}
-              <div className="text-[18px] lg:text-[20px] font-medium leading-[150%] mt-[20px] mb-[10px]">
-                What&apos;s Included:
-              </div>
-              <div className="text-[16px] lg:text-[15px] leading-[150%] mb-[20px] lg:mb-[10px]">
-                All painting supplies provided {!isRegularClass && '+ snacks and drinks'} for absolute relaxation and immersion in
-                the friendly atmosphere of creativity
-              </div>
-
-              {/* Price */}
-              <div className="flex items-center gap-2 text-[16px] lg:text-[15px] leading-[150%] mb-[10px]">
-                <img src="/assets/img/icon-price.svg" alt="" />
-                Price: {event.price} $ per person {event.discount && `(${event.discount})`}
-              </div>
-
-              {/* Form */}
-              <form onSubmit={handleSubmit(onSubmit)} className="mt-[40px]">
-                {error && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-                    {error}
-                  </div>
-                )}
-
-                {/* Name & Phone Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-[20px]">
-                  <div className="flex flex-col">
-                    <label htmlFor="name" className="text-[14px] font-semibold leading-[17px] mb-[10px]">
-                      Name<span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      {...register('name')}
-                      className="border border-[#B9B9B9] rounded-[50px] h-[50px] px-[20px] mb-[20px] outline-none focus:border-primary"
+            {/* Body - Two columns on desktop */}
+            <div className="px-[15px] lg:px-[40px] pb-[40px] lg:pb-[50px]">
+              <div className="flex flex-col lg:flex-row lg:gap-[40px]">
+                {/* Left Column - Event Info */}
+                <div className="lg:w-1/2">
+                  {/* Description */}
+                  {event.modalDescription && (
+                    <div
+                      className="text-[15px] leading-[150%] mb-4"
+                      dangerouslySetInnerHTML={{ __html: event.modalDescription }}
                     />
-                    {errors.name && (
-                      <p className="-mt-[15px] mb-[10px] text-sm text-red-500">{errors.name.message}</p>
+                  )}
+
+                  {/* Event Information */}
+                  <div className="flex items-center gap-2 text-[15px] leading-[150%] mb-[7px]">
+                    <img src="/assets/img/icon-date.svg" alt="" />
+                    Date: {formatDate(event.date)}
+                  </div>
+                  <div className="flex items-center gap-2 text-[15px] leading-[150%] mb-[7px]">
+                    <img src="/assets/img/icon_time.svg" alt="" />
+                    Time: {getTimeDisplay()}
+                  </div>
+                  <div className="flex items-center gap-2 text-[15px] leading-[150%] mb-0">
+                    <img src="/assets/img/icon-location.svg" alt="" />
+                    Location: {event.location}
+                  </div>
+
+                  {/* What's Included */}
+                  <div className="text-[18px] font-medium leading-[150%] mt-[20px] mb-[10px]">
+                    What&apos;s Included:
+                  </div>
+                  <div className="text-[15px] leading-[150%] mb-[15px]">
+                    All painting supplies provided {!isRegularClass && '+ snacks and drinks'} for absolute relaxation and immersion in
+                    the friendly atmosphere of creativity
+                  </div>
+
+                  {/* Price */}
+                  <div className="flex items-center gap-2 text-[15px] leading-[150%] mb-[10px] flex-wrap">
+                    <img src="/assets/img/icon-price.svg" alt="" />
+                    <span>Price:</span>
+                    {event.discount && event.discount < event.price ? (
+                      <>
+                        <span className="line-through text-gray-400">${event.price}</span>
+                        <span className="font-bold text-[#0D882B]">${event.discount}</span>
+                        <span className="bg-red-100 text-red-600 text-[12px] px-2 py-0.5 rounded-full font-medium">
+                          SALE
+                        </span>
+                      </>
+                    ) : (
+                      <span className="font-semibold">${event.price}</span>
+                    )}
+                    {event.priceLabel && (
+                      <span className="bg-primary/20 text-primary-dark text-[12px] px-2 py-0.5 rounded-full">
+                        {event.priceLabel}
+                      </span>
                     )}
                   </div>
-                  <div className="flex flex-col">
-                    <label htmlFor="phone" className="text-[14px] font-semibold leading-[17px] mb-[10px]">
-                      Phone Number<span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      {...register('phone')}
-                      className="border border-[#B9B9B9] rounded-[50px] h-[50px] px-[20px] mb-[20px] outline-none focus:border-primary"
-                    />
-                  </div>
+
+                  {/* Available Seats */}
+                  {event.capacity != null && (
+                    <div className={`flex items-center gap-2 text-[15px] leading-[150%] mb-[20px] lg:mb-0 ${
+                      event.capacity - (event.bookedSeats || 0) <= 5 ? 'text-orange-600 font-medium' : ''
+                    }`}>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Available spots: {event.capacity - (event.bookedSeats || 0)} of {event.capacity}
+                    </div>
+                  )}
                 </div>
 
-                {/* Email */}
-                <label htmlFor="email" className="text-[14px] font-semibold leading-[17px] mb-[10px] block">
-                  Email<span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  {...register('email')}
-                  className="w-full border border-[#B9B9B9] rounded-[50px] h-[50px] px-[20px] mb-[20px] outline-none focus:border-primary"
-                />
-                {errors.email && (
-                  <p className="-mt-[15px] mb-[10px] text-sm text-red-500">{errors.email.message}</p>
-                )}
+                {/* Right Column - Form */}
+                <div className="lg:w-1/2 mt-[30px] lg:mt-0">
+                  <form onSubmit={handleSubmit(onSubmit)}>
+                    {error && (
+                      <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                        {error}
+                      </div>
+                    )}
 
-                {/* Message */}
-                <label htmlFor="message" className="text-[14px] font-semibold leading-[17px] mb-[10px] block">
-                  Add Your Message<span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  id="message"
-                  {...register('message')}
-                  className="w-full border border-[#B9B9B9] rounded-[35px] h-[100px] p-[15px_20px] mb-[20px] outline-none focus:border-primary resize-none"
-                />
-                {errors.message && (
-                  <p className="-mt-[15px] mb-[10px] text-sm text-red-500">{errors.message.message}</p>
-                )}
-
-                {/* Subscribe Checkbox */}
-                <div className="flex items-center gap-[16px] mb-[20px]">
-                  <input
-                    type="checkbox"
-                    id="subscribe"
-                    {...register('isSubscribed')}
-                    className="w-[20px] h-[20px] rounded-[5px] border border-[#999] cursor-pointer accent-primary"
-                  />
-                  <label htmlFor="subscribe" className="text-[16px] cursor-pointer">
-                    Subscribe to updates and new events
-                  </label>
-                </div>
-
-                {/* Submit Button & Cancellation Policy */}
-                <div className="flex flex-col items-center mt-[16px]">
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="main-button disabled:opacity-50"
-                  >
-                    {isLoading ? 'Processing...' : 'Proceed to check out'}
-                  </button>
-
-                  {/* Cancellation Policy */}
-                  <div className="relative mt-3 group">
-                    <button
-                      type="button"
-                      className="text-[14px] font-medium text-[#007bff] hover:underline bg-transparent border-none cursor-pointer"
-                    >
-                      Cancellation Policy
-                    </button>
-                    <div className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 w-full min-w-[288px] max-w-[500px] bg-white border border-[#ddd] rounded-[12px] p-[15px] text-[14px] leading-[1.5] shadow-[0_4px_12px_rgba(0,0,0,0.15)] z-[100] mb-2">
-                      {cancellationPolicy ? (
-                        <div dangerouslySetInnerHTML={{ __html: cancellationPolicy }} />
-                      ) : (
-                        <>
-                          <p>
-                            At Shuhai Art Studio, we strive to create a welcoming and well-prepared
-                            experience for every participant.
-                            To ensure fairness and to cover the costs involved in preparing for each
-                            class, we kindly ask you to review our cancellation terms:
-                          </p>
-                          <ul className="list-disc pl-5 my-2">
-                            <li>Cancellations 2 or more days before the workshop – a refund will be
-                              issued minus 20% to cover materials and administrative expenses.</li>
-                            <li>For cancellations made 24 hours before the start of the workshop, 50% of
-                              the payment will be retained, as materials and studio preparation have
-                              already been arranged.
-                            </li>
-                            <li>Same-day cancellations or no-shows – the payment is non-refundable, as
-                              your reserved spot and materials cannot be reassigned.</li>
-                          </ul>
-                          <p className="mb-0">We appreciate your understanding and continued support of our
-                            studio.</p>
-                        </>
+                    {/* Name */}
+                    <div className="flex flex-col">
+                      <label htmlFor="name" className="text-[14px] font-semibold leading-[17px] mb-[10px]">
+                        Name<span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="name"
+                        {...register('name')}
+                        className="border border-[#B9B9B9] rounded-[50px] h-[50px] px-[20px] mb-[15px] outline-none focus:border-primary"
+                      />
+                      {errors.name && (
+                        <p className="-mt-[10px] mb-[10px] text-sm text-red-500">{errors.name.message}</p>
                       )}
                     </div>
-                  </div>
+
+                    {/* Phone */}
+                    <div className="flex flex-col">
+                      <label htmlFor="phone" className="text-[14px] font-semibold leading-[17px] mb-[10px]">
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        {...register('phone')}
+                        className="border border-[#B9B9B9] rounded-[50px] h-[50px] px-[20px] mb-[15px] outline-none focus:border-primary"
+                      />
+                    </div>
+
+                    {/* Email */}
+                    <label htmlFor="email" className="text-[14px] font-semibold leading-[17px] mb-[10px] block">
+                      Email<span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      {...register('email')}
+                      className="w-full border border-[#B9B9B9] rounded-[50px] h-[50px] px-[20px] mb-[15px] outline-none focus:border-primary"
+                    />
+                    {errors.email && (
+                      <p className="-mt-[10px] mb-[10px] text-sm text-red-500">{errors.email.message}</p>
+                    )}
+
+                    {/* Message */}
+                    <label htmlFor="message" className="text-[14px] font-semibold leading-[17px] mb-[10px] block">
+                      Add Your Message
+                    </label>
+                    <textarea
+                      id="message"
+                      {...register('message')}
+                      placeholder="Any questions or special requests?"
+                      className="w-full border border-[#B9B9B9] rounded-[25px] h-[80px] p-[12px_20px] mb-[15px] outline-none focus:border-primary resize-none"
+                    />
+
+                    {/* Subscribe Checkbox */}
+                    <div className="flex items-center gap-[12px] mb-[20px]">
+                      <input
+                        type="checkbox"
+                        id="subscribe"
+                        {...register('isSubscribed')}
+                        className="w-[18px] h-[18px] rounded-[5px] border border-[#999] cursor-pointer accent-primary"
+                      />
+                      <label htmlFor="subscribe" className="text-[14px] cursor-pointer">
+                        Subscribe to updates and new events
+                      </label>
+                    </div>
+
+                    {/* Submit Button & Cancellation Policy */}
+                    <div className="flex flex-col items-center">
+                      <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="main-button !w-full disabled:opacity-50"
+                      >
+                        {isLoading ? 'Processing...' : 'Proceed to check out'}
+                      </button>
+
+                      {/* Cancellation Policy */}
+                      <div className="relative mt-3 group">
+                        <button
+                          type="button"
+                          className="text-[14px] font-medium text-[#007bff] hover:underline bg-transparent border-none cursor-pointer"
+                        >
+                          Cancellation Policy
+                        </button>
+                        <div className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 w-full min-w-[288px] max-w-[400px] bg-white border border-[#ddd] rounded-[12px] p-[15px] text-[13px] leading-[1.5] shadow-[0_4px_12px_rgba(0,0,0,0.15)] z-[100] mb-2">
+                          {cancellationPolicy ? (
+                            <div dangerouslySetInnerHTML={{ __html: cancellationPolicy }} />
+                          ) : (
+                            <>
+                              <p>
+                                At Shuhai Art Studio, we strive to create a welcoming and well-prepared
+                                experience for every participant.
+                              </p>
+                              <ul className="list-disc pl-5 my-2">
+                                <li>Cancellations 2+ days before – refund minus 20%</li>
+                                <li>Cancellations 24h before – 50% retained</li>
+                                <li>Same-day/no-shows – non-refundable</li>
+                              </ul>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </form>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         </div>

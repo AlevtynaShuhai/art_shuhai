@@ -22,6 +22,11 @@ async function fetchStrapi<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T | null> {
+  // Log if no token for mutation requests
+  if (!STRAPI_TOKEN && options.method && ['POST', 'PUT', 'DELETE'].includes(options.method)) {
+    console.warn('[Strapi] No API token available for', options.method, endpoint);
+  }
+
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...(STRAPI_TOKEN && { Authorization: `Bearer ${STRAPI_TOKEN}` }),
@@ -29,13 +34,16 @@ async function fetchStrapi<T>(
   };
 
   try {
-    const response = await fetch(`${STRAPI_URL}/api${endpoint}`, {
+    const url = `${STRAPI_URL}/api${endpoint}`;
+
+    const response = await fetch(url, {
       ...options,
       headers,
     });
 
     if (!response.ok) {
-      console.error(`Strapi API error: ${response.status} ${response.statusText}`);
+      const errorBody = await response.text();
+      console.error(`[Strapi] API error ${response.status} ${response.statusText}:`, errorBody);
       return null;
     }
 
@@ -43,7 +51,7 @@ async function fetchStrapi<T>(
   } catch (error) {
     // Handle connection errors (e.g., Strapi not running)
     if (error instanceof Error) {
-      console.warn(`Strapi connection failed: ${error.message}. Using fallback data.`);
+      console.error(`[Strapi] Connection failed: ${error.message}`);
     }
     return null;
   }
@@ -121,9 +129,22 @@ export async function createLead(data: CreateLeadInput) {
   });
 }
 
-// Update Lead
-export async function updateLead(id: number, data: Partial<Lead>) {
-  return fetchStrapi<StrapiSingleResponse<Lead>>(`/leads/${id}`, {
+// Update Lead by documentId (Strapi v5)
+export async function updateLead(documentId: string, data: Partial<Lead>) {
+  return fetchStrapi<StrapiSingleResponse<Lead>>(`/leads/${documentId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ data }),
+  });
+}
+
+// Get Lead with populated event
+export async function getLead(documentId: string) {
+  return fetchStrapi<StrapiSingleResponse<Lead & { event?: Event }>>(`/leads/${documentId}?populate=event`);
+}
+
+// Update Event by documentId
+export async function updateEvent(documentId: string, data: Partial<Event>) {
+  return fetchStrapi<StrapiSingleResponse<Event>>(`/events/${documentId}`, {
     method: 'PUT',
     body: JSON.stringify({ data }),
   });
@@ -141,15 +162,18 @@ export interface Event {
   endTime?: string;
   flexibleSchedule?: boolean;
   price: number;
+  discount?: number | null; // Sale price (if lower than price)
+  priceLabel?: string;
   location: string;
   image: StrapiMedia;
   shortDescription: string;
   fullDescription: string;
   modalDescription?: string;
   includes: Array<{ id: number; text: string }>;
-  discount?: string;
   eventType: 'one-time' | 'regular';
   isActive: boolean;
+  capacity?: number | null; // Total seats (null = unlimited)
+  bookedSeats?: number; // Number of booked seats
   createdAt: string;
   updatedAt: string;
   publishedAt: string;

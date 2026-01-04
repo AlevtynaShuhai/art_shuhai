@@ -44,10 +44,10 @@ export async function POST(request: NextRequest) {
       isSubscribed: validatedData.isSubscribed,
     });
 
-    if (!leadResponse?.data?.id) {
+    if (!leadResponse?.data?.documentId) {
       throw new Error('Failed to create lead in Strapi');
     }
-    const leadId = leadResponse.data.id;
+    const leadDocumentId = leadResponse.data.documentId;
 
     // Create Stripe checkout session
     const session = await createCheckoutSession({
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       customerEmail: validatedData.email,
       customerPhone: validatedData.phone,
       message: validatedData.message,
-      leadId,
+      leadDocumentId,
       securityNonce,
     });
 

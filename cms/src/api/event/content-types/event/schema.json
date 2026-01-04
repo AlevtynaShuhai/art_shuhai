@@ -41,6 +41,9 @@
       "type": "decimal",
       "required": true
     },
+    "priceLabel": {
+      "type": "string"
+    },
     "location": {
       "type": "string",
       "required": true
@@ -57,13 +60,16 @@
     "fullDescription": {
       "type": "richtext"
     },
+    "modalDescription": {
+      "type": "richtext"
+    },
     "includes": {
       "type": "component",
       "repeatable": true,
       "component": "event.include-item"
     },
     "discount": {
-      "type": "string"
+      "type": "decimal"
     },
     "eventType": {
       "type": "enumeration",
@@ -74,6 +80,14 @@
     "isActive": {
       "type": "boolean",
       "default": true
+    },
+    "capacity": {
+      "type": "integer",
+      "default": null
+    },
+    "bookedSeats": {
+      "type": "integer",
+      "default": 0
     }
   }
 }

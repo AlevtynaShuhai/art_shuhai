@@ -44,9 +44,9 @@ export default function HomePageClient({
   return (
     <>
       {/* Hero Section - V1 Banner Style */}
-      <section className="banner h-[520px] lg:h-[700px] mb-[80px] lg:mb-[200px]">
+      <section className="banner h-[420px] lg:h-[700px] mb-[80px] lg:mb-[200px]">
         <div className="container mx-auto px-[15px] flex flex-col items-center">
-          <div className="text-white font-serif text-[38px] lg:text-[72px] font-bold leading-[100%] text-center uppercase italic mt-[115px] lg:mt-[177px] mb-[15px] lg:mb-[21px]">
+          <div className="text-white font-serif text-[28px] lg:text-[72px] font-bold leading-[110%] lg:leading-[100%] text-center uppercase italic mt-[80px] lg:mt-[177px] mb-[15px] lg:mb-[21px]">
             "Art washes away from the<br />soul the dust<br />of everyday life"
           </div>
           <div className="text-white text-[18px] lg:text-[30px] font-normal leading-[120%] mb-[30px] lg:mb-[40px]">
@@ -207,8 +207,8 @@ export default function HomePageClient({
                 &ldquo;Escape the Ordinary – Paint Your Dreams!&rdquo;
               </span>
             </div>
-            <div className="lg:w-1/4 flex justify-center">
-              <a href="#events" className="main-button" style={{ width: '250px', height: '50px' }}>Events</a>
+            <div className="lg:w-1/4 flex justify-center w-full px-4 lg:px-0">
+              <a href="#events" className="main-button w-full lg:w-[250px]" style={{ height: '50px' }}>Events</a>
             </div>
           </div>
         </div>

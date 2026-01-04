@@ -43,10 +43,17 @@ export default function EventCard({ event, onSignUp }: EventCardProps) {
     return 'Time TBD';
   };
 
+  // Calculate available seats
+  const availableSeats = event.capacity != null
+    ? event.capacity - (event.bookedSeats || 0)
+    : null;
+  const isSoldOut = availableSeats !== null && availableSeats <= 0;
+  const isLimitedSeats = availableSeats !== null && availableSeats > 0 && availableSeats <= 5;
+
   return (
     <div className="rounded-[40px] lg:rounded-[50px] shadow-[0_4px_20px_rgba(0,0,0,0.1)] bg-white overflow-hidden h-full flex flex-col">
-      {/* Image - V1: 400px height, rounded top */}
-      <div className="relative h-[400px] overflow-hidden rounded-t-[40px] lg:rounded-t-[50px] bg-gray-200">
+      {/* Image - responsive height */}
+      <div className="relative h-[280px] lg:h-[400px] overflow-hidden rounded-t-[40px] lg:rounded-t-[50px] bg-gray-200">
         {event.image ? (
           <Image
             src={getStrapiMediaUrl(event.image)}
@@ -61,16 +68,37 @@ export default function EventCard({ event, onSignUp }: EventCardProps) {
             </svg>
           </div>
         )}
-        {event.discount && (
+        {/* Left badge - spots available */}
+        {availableSeats !== null && !isSoldOut && (
+          <div className={`absolute top-4 left-4 text-white text-sm font-medium px-3 py-1 rounded-full ${
+            isLimitedSeats ? 'bg-orange-500' : 'bg-[#0D882B]'
+          }`}>
+            {availableSeats} spots left
+          </div>
+        )}
+
+        {/* Right top badge - status */}
+        {isSoldOut ? (
+          <div className="absolute top-4 right-4 bg-gray-800 text-white text-sm font-medium px-3 py-1 rounded-full">
+            Sold out
+          </div>
+        ) : event.discount && event.discount < event.price ? (
           <div className="absolute top-4 right-4 bg-red-500 text-white text-sm font-medium px-3 py-1 rounded-full">
-            {event.discount}
+            SALE
+          </div>
+        ) : null}
+
+        {/* Right bottom badge - priceLabel */}
+        {event.priceLabel && (
+          <div className="absolute bottom-4 right-4 bg-primary text-black text-sm font-medium px-3 py-1 rounded-full shadow-md">
+            {event.priceLabel}
           </div>
         )}
       </div>
 
       {/* Content - V1 style padding */}
       <div className="p-[20px_15px_35px] lg:p-[30px_30px_40px] flex flex-col flex-grow">
-        <h3 className="font-serif text-[36px] font-normal leading-[115%] mb-[20px]">
+        <h3 className="font-serif text-[26px] lg:text-[36px] font-normal leading-[115%] mb-[15px] lg:mb-[20px]">
           {event.title}
         </h3>
 
@@ -84,7 +112,16 @@ export default function EventCard({ event, onSignUp }: EventCardProps) {
           {/* Price */}
           <div className="flex items-center text-[15px] leading-[150%] mb-[7px]">
             <img src="/assets/img/icon-price.svg" alt="" className="mr-[8px]" />
-            <span>${event.price}</span>
+            <div className="flex items-center gap-2 flex-wrap">
+              {event.discount && event.discount < event.price ? (
+                <>
+                  <span className="line-through text-gray-400">${event.price}</span>
+                  <span className="font-bold text-[#0D882B]">${event.discount}</span>
+                </>
+              ) : (
+                <span className="font-semibold">${event.price}</span>
+              )}
+            </div>
           </div>
 
           {/* Location */}
@@ -92,6 +129,7 @@ export default function EventCard({ event, onSignUp }: EventCardProps) {
             <img src="/assets/img/icon-location.svg" alt="" className="mr-[8px]" />
             <span>{event.location}</span>
           </div>
+
 
           {/* Description */}
           {event.shortDescription && (
@@ -104,9 +142,10 @@ export default function EventCard({ event, onSignUp }: EventCardProps) {
         {/* Sign Up Button - V1 main-button style, full width */}
         <button
           onClick={() => onSignUp(event)}
-          className="main-button !w-full"
+          disabled={isSoldOut}
+          className={`main-button !w-full ${isSoldOut ? '!bg-gray-400 !cursor-not-allowed' : ''}`}
         >
-          Sign up
+          {isSoldOut ? 'Sold out' : 'Sign up'}
         </button>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { constructWebhookEvent, retrievePaymentIntent } from '@/lib/stripe';
-import { updateLead } from '@/lib/strapi';
+import { updateLead, getLead, updateEvent } from '@/lib/strapi';
 import type Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -72,14 +72,21 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
+  console.log('[Webhook] checkout.session.completed received');
+  console.log('[Webhook] Session ID:', session.id);
+  console.log('[Webhook] Metadata:', session.metadata);
+
   const metadata = session.metadata;
-  if (!metadata?.leadId) {
-    console.error('No leadId in session metadata');
+  if (!metadata?.leadDocumentId) {
+    console.error('[Webhook] No leadDocumentId in session metadata');
     return;
   }
 
-  const leadId = parseInt(metadata.leadId, 10);
+  const leadDocumentId = metadata.leadDocumentId;
   const paymentIntentId = session.payment_intent as string;
+
+  console.log('[Webhook] Lead documentId:', leadDocumentId);
+  console.log('[Webhook] Payment Intent ID:', paymentIntentId);
 
   // Get payment intent with charge details
   let chargeId: string | undefined;
@@ -93,15 +100,15 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         chargeId = charge.id;
         receiptUrl = charge.receipt_url || undefined;
       }
+      console.log('[Webhook] Charge ID:', chargeId);
     } catch (err) {
-      console.error('Failed to retrieve payment intent:', err);
+      console.error('[Webhook] Failed to retrieve payment intent:', err);
     }
   }
 
-  // Update lead with full transaction details
-  await updateLead(leadId, {
-    paymentStatus: 'paid',
-    orderStatus: 'new',
+  const updateData = {
+    paymentStatus: 'paid' as const,
+    orderStatus: 'new' as const,
     stripeSessionId: session.id,
     stripePaymentIntent: paymentIntentId,
     stripeChargeId: chargeId,
@@ -109,18 +116,47 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     amountPaid: (session.amount_total || 0) / 100,
     currency: session.currency || 'cad',
     paidAt: new Date().toISOString(),
-  });
+  };
+
+  console.log('[Webhook] Updating lead with:', updateData);
+
+  // Update lead with full transaction details
+  const result = await updateLead(leadDocumentId, updateData);
+
+  if (result) {
+    console.log('[Webhook] Lead updated successfully:', result);
+
+    // Increment bookedSeats on the event if capacity tracking is enabled
+    try {
+      const leadData = await getLead(leadDocumentId);
+      const event = leadData?.data?.event;
+
+      if (event && event.capacity != null) {
+        const newBookedSeats = (event.bookedSeats || 0) + 1;
+        console.log('[Webhook] Incrementing bookedSeats for event:', event.documentId, 'from', event.bookedSeats || 0, 'to', newBookedSeats);
+
+        await updateEvent(event.documentId, {
+          bookedSeats: newBookedSeats,
+        });
+        console.log('[Webhook] Event bookedSeats updated successfully');
+      }
+    } catch (err) {
+      console.error('[Webhook] Failed to update event bookedSeats:', err);
+    }
+  } else {
+    console.error('[Webhook] Failed to update lead:', leadDocumentId);
+  }
 }
 
 async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
   const metadata = session.metadata;
-  if (!metadata?.leadId) return;
+  if (!metadata?.leadDocumentId) return;
 
-  const leadId = parseInt(metadata.leadId, 10);
+  const leadDocumentId = metadata.leadDocumentId;
 
-  await updateLead(leadId, {
-    paymentStatus: 'failed',
-    orderStatus: 'cancelled',
+  await updateLead(leadDocumentId, {
+    paymentStatus: 'failed' as const,
+    orderStatus: 'cancelled' as const,
     stripeSessionId: session.id,
   });
 }

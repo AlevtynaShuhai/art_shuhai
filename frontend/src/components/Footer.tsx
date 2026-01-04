@@ -21,7 +21,7 @@ export default function Footer({ settings }: FooterProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2">
         {/* Contacts Right (on desktop) - V1 Style */}
         <div className="bg-[#FFB785] pt-[96px] lg:pt-[160px] pb-[30px] lg:pb-[40px] pl-[15px] lg:pl-[70px] pr-[15px] lg:pr-0 order-2 lg:order-2">
-          <h3 className="font-serif text-[50px] font-normal leading-[115%] mb-[36px]">
+          <h3 className="font-serif text-[32px] lg:text-[50px] font-normal leading-[115%] mb-[24px] lg:mb-[36px]">
             Contacts
           </h3>
 

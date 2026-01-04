@@ -25,16 +25,23 @@ async function getData() {
   const homepage = homepageRes?.data || null;
   const settings = settingsRes?.data || null;
 
-  // Filter out past events
+  // Filter events by type and date
   const now = new Date();
-  const activeEvents = events.filter((event: Event) => {
+
+  // One-time events: active, future, eventType = 'one-time'
+  const oneTimeEvents = events.filter((event: Event) => {
     const eventDate = new Date(event.date);
-    return eventDate >= now && event.isActive;
+    return eventDate >= now && event.isActive && event.eventType === 'one-time';
+  });
+
+  // Regular events: active, eventType = 'regular'
+  const regularEventsFiltered = events.filter((event: Event) => {
+    return event.isActive && event.eventType === 'regular';
   });
 
   return {
-    events: activeEvents,
-    regularEvents: events.filter((e: Event) => e.eventType === 'regular'),
+    events: oneTimeEvents,
+    regularEvents: regularEventsFiltered,
     studentArtworks: allStudentArtworks,
     instructorArtworks: allInstructorArtworks,
     faqs,
