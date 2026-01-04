@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: 'standalone', // Required for Docker deployment
+  turbopack: {
+    root: __dirname, // Correct root for monorepo - frontend directory
+  },
   images: {
     // Allow localhost images in development (bypasses private IP restriction)
     unoptimized: process.env.NODE_ENV === 'development',

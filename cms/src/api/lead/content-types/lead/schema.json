@@ -87,6 +87,9 @@
     },
     "notes": {
       "type": "text"
+    },
+    "seenAt": {
+      "type": "datetime"
     }
   }
 }

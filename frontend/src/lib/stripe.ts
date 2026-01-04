@@ -26,7 +26,7 @@ export interface CreateCheckoutSessionParams {
   customerEmail: string;
   customerPhone?: string;
   message?: string;
-  leadId: number;
+  leadDocumentId: string;
   securityNonce: string;
 }
 
@@ -41,7 +41,7 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
     customerEmail,
     customerPhone,
     message,
-    leadId,
+    leadDocumentId,
     securityNonce,
   } = params;
 
@@ -64,7 +64,7 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
       },
     ],
     metadata: {
-      leadId: leadId.toString(),
+      leadDocumentId,
       eventName,
       eventDate,
       eventTime,
@@ -75,7 +75,7 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
       message: message || '',
       securityNonce,
     },
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/thank-you?session_id={CHECKOUT_SESSION_ID}&lead_id=${leadId}`,
+    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/thank-you?session_id={CHECKOUT_SESSION_ID}&lead_id=${leadDocumentId}`,
     cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}?canceled=true`,
   });
 

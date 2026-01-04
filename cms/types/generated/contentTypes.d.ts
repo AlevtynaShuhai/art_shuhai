@@ -475,6 +475,8 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    bookedSeats: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    capacity: Schema.Attribute.Integer;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -494,7 +496,9 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::event.event'> &
       Schema.Attribute.Private;
     location: Schema.Attribute.String & Schema.Attribute.Required;
+    modalDescription: Schema.Attribute.RichText;
     price: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    priceLabel: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     shortDescription: Schema.Attribute.Text;
     slug: Schema.Attribute.UID<'title'>;
@@ -618,6 +622,7 @@ export interface ApiLeadLead extends Struct.CollectionTypeSchema {
     phone: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     securityNonce: Schema.Attribute.String;
+    seenAt: Schema.Attribute.DateTime;
     stripeChargeId: Schema.Attribute.String;
     stripePaymentIntent: Schema.Attribute.String;
     stripeReceiptUrl: Schema.Attribute.String;
