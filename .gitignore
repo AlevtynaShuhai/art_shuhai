@@ -33,6 +33,7 @@ yarn-error.log*
 
 # Build outputs
 dist/
+!cms/src/plugins/*/dist/
 build/
 .next/
 out/
