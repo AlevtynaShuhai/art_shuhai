@@ -73,19 +73,19 @@ export default function HomePageClient({
                 Visual arts & creative classes
               </div>
               <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
-                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                <img src="/assets/img/icon-checkmark.webp" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
                 individual lessons
               </div>
               <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
-                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                <img src="/assets/img/icon-checkmark.webp" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
                 group workshops for children and adults
               </div>
               <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
-                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                <img src="/assets/img/icon-checkmark.webp" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
                 corporate events
               </div>
               <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-0 leading-[150%]">
-                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                <img src="/assets/img/icon-checkmark.webp" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
                 courses in the visual arts for all levels of training and much more
               </div>
             </div>
@@ -97,27 +97,27 @@ export default function HomePageClient({
                 Why me?
               </div>
               <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
-                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                <img src="/assets/img/icon-checkmark.webp" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
                 professional experience teaching fine arts for over 12 years
               </div>
               <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
-                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                <img src="/assets/img/icon-checkmark.webp" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
                 friendly and inspiring atmosphere at the classes
               </div>
               <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
-                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                <img src="/assets/img/icon-checkmark.webp" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
                 provision of high quality materials
               </div>
               <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
-                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                <img src="/assets/img/icon-checkmark.webp" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
                 individual approach to each student
               </div>
               <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-[12px] lg:mb-[15px] leading-[150%]">
-                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                <img src="/assets/img/icon-checkmark.webp" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
                 flexible schedule
               </div>
               <div className="flex items-start gap-[6px] lg:gap-[10px] text-[16px] lg:text-[20px] mb-0 leading-[150%]">
-                <img src="/assets/img/icon-checkmark.png" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
+                <img src="/assets/img/icon-checkmark.webp" alt="" className="w-6 h-6 lg:w-auto lg:h-auto mt-1" />
                 convenient location
               </div>
             </div>
@@ -196,7 +196,7 @@ export default function HomePageClient({
       <section
         className="section-spacing h-[227px] flex items-center"
         style={{
-          background: 'url(/assets/img/subscribe-to-the-newsletter.png) center no-repeat',
+          background: 'url(/assets/img/subscribe-to-the-newsletter.webp) center no-repeat',
           backgroundSize: 'cover'
         }}
       >

@@ -13,7 +13,7 @@ export default function Footer({ settings }: FooterProps) {
       <div
         className="absolute left-0 top-[-2px] w-full h-[66px] lg:h-[127px] z-10 pointer-events-none"
         style={{
-          background: 'url(/assets/img/footer-bg.png) center bottom no-repeat',
+          background: 'url(/assets/img/footer-bg.webp) center bottom no-repeat',
           backgroundSize: 'cover'
         }}
       />
