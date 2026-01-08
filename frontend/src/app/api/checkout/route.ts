@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
 
     // Create Stripe checkout session
     const session = await createCheckoutSession({
+      eventId: validatedData.eventId,
       eventName: validatedData.eventName,
       eventDate: validatedData.eventDate,
       eventTime: validatedData.eventTime,

@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 // Lazy initialization to avoid build-time errors
 let stripeInstance: Stripe | null = null;
 
-function getStripe(): Stripe {
+export function getStripe(): Stripe {
   if (!stripeInstance) {
     if (!process.env.STRIPE_SECRET_KEY) {
       throw new Error('Missing STRIPE_SECRET_KEY environment variable');
@@ -17,6 +17,7 @@ function getStripe(): Stripe {
 }
 
 export interface CreateCheckoutSessionParams {
+  eventId?: string;
   eventName: string;
   eventDate: string;
   eventTime: string;
@@ -32,6 +33,7 @@ export interface CreateCheckoutSessionParams {
 
 export async function createCheckoutSession(params: CreateCheckoutSessionParams) {
   const {
+    eventId,
     eventName,
     eventDate,
     eventTime,
@@ -65,6 +67,7 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
     ],
     metadata: {
       leadDocumentId,
+      eventId: eventId || '',
       eventName,
       eventDate,
       eventTime,

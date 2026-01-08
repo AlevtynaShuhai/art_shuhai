@@ -1,7 +1,51 @@
-import Image from 'next/image';
-import Link from 'next/link';
+'use client';
 
-export default function ThankYouPage() {
+import { useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { Suspense } from 'react';
+import { trackPurchase } from '@/lib/analytics';
+import { trackFBPurchase } from '@/components/Analytics/FacebookPixel';
+
+function ThankYouContent() {
+  const searchParams = useSearchParams();
+  const hasTracked = useRef(false);
+
+  useEffect(() => {
+    // Only track once
+    if (hasTracked.current) return;
+
+    const sessionId = searchParams?.get('session_id');
+
+    if (sessionId) {
+      // Fetch session details and track purchase
+      fetch(`/api/checkout/session?session_id=${sessionId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.session) {
+            const { session } = data;
+
+            // Track purchase in Google Analytics
+            trackPurchase({
+              transactionId: session.id,
+              value: (session.amount_total || 0) / 100,
+              items: [{
+                id: session.metadata?.eventId || 'unknown',
+                name: session.metadata?.eventName || 'Art Class',
+                price: (session.amount_total || 0) / 100,
+              }],
+            });
+
+            // Track purchase in Facebook Pixel
+            trackFBPurchase((session.amount_total || 0) / 100);
+
+            hasTracked.current = true;
+          }
+        })
+        .catch(console.error);
+    }
+  }, [searchParams]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-white">
       <div className="text-center px-4 py-16">
@@ -43,5 +87,17 @@ export default function ThankYouPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function ThankYouPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    }>
+      <ThankYouContent />
+    </Suspense>
   );
 }

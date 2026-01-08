@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Image from 'next/image';
+import { trackFormSubmit } from '@/lib/analytics';
+import { trackFBLead } from '@/components/Analytics/FacebookPixel';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -42,6 +44,10 @@ export default function ContactForm() {
       if (!response.ok) {
         throw new Error('Failed to send message');
       }
+
+      // Track successful form submission
+      trackFormSubmit('contact_form');
+      trackFBLead();
 
       setIsSuccess(true);
       reset();

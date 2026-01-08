@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Event } from '@/lib/strapi';
+import { trackBeginCheckout, trackFormSubmit } from '@/lib/analytics';
+import { trackFBInitiateCheckout } from '@/components/Analytics/FacebookPixel';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -110,6 +112,15 @@ export default function OrderModal({
       }
 
       const { url } = await response.json();
+
+      // Track checkout initiation
+      trackBeginCheckout([{
+        id: event.documentId,
+        name: event.title,
+        price: actualPrice,
+      }]);
+      trackFBInitiateCheckout(actualPrice);
+      trackFormSubmit('order_form', { event_name: event.title });
 
       if (url) {
         window.location.href = url;
