@@ -48,6 +48,8 @@ cms/public/uploads/*
 cms/database/
 cms/*.db
 cms/*.db-journal
+cms/backups/*
+!cms/backups/.gitkeep
 
 # Backup files
 *.tar.gz
