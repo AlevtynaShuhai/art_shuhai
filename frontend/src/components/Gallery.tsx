@@ -16,6 +16,7 @@ export default function Gallery({ studentArtworks, instructorArtworks }: Gallery
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   // For rotation: track which indices are displayed in each of 4 positions
   const [displayedIndices, setDisplayedIndices] = useState<number[]>([0, 1, 2, 3]);
@@ -30,6 +31,11 @@ export default function Gallery({ studentArtworks, instructorArtworks }: Gallery
 
   const hasMoreThanFour = currentArtworks.length > 4;
 
+  // Mark as mounted after hydration
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Reset displayed indices when tab changes or artworks change
   useEffect(() => {
     setDisplayedIndices([0, 1, 2, 3].filter(i => i < currentArtworks.length));
@@ -37,12 +43,13 @@ export default function Gallery({ studentArtworks, instructorArtworks }: Gallery
     setIsFadingOut(false);
   }, [activeTab, currentArtworks.length]);
 
-  // Trigger animation on tab change
+  // Trigger animation on tab change (only after mount)
   useEffect(() => {
+    if (!isMounted) return;
     setIsAnimating(true);
     const timer = setTimeout(() => setIsAnimating(false), 100);
     return () => clearTimeout(timer);
-  }, [activeTab]);
+  }, [activeTab, isMounted]);
 
   // Rotation logic
   const rotateImage = useCallback(() => {
@@ -79,8 +86,10 @@ export default function Gallery({ studentArtworks, instructorArtworks }: Gallery
     }, 500);
   }, [currentArtworks.length, displayedIndices, hasMoreThanFour]);
 
-  // Set up rotation interval
+  // Set up rotation interval (only after mount)
   useEffect(() => {
+    if (!isMounted) return;
+
     if (hasMoreThanFour && !lightboxOpen) {
       rotationTimerRef.current = setInterval(rotateImage, 3500);
     }
@@ -90,7 +99,7 @@ export default function Gallery({ studentArtworks, instructorArtworks }: Gallery
         clearInterval(rotationTimerRef.current);
       }
     };
-  }, [hasMoreThanFour, rotateImage, lightboxOpen]);
+  }, [hasMoreThanFour, rotateImage, lightboxOpen, isMounted]);
 
   const slides = currentArtworks.map((artwork) => ({
     src: getStrapiMediaUrl(artwork.image),
@@ -116,6 +125,9 @@ export default function Gallery({ studentArtworks, instructorArtworks }: Gallery
     }
     return 'opacity-100 scale-100';
   };
+
+  // Get first 4 artworks for initial SSR render
+  const initialArtworks = currentArtworks.slice(0, 4);
 
   return (
     <div className="w-full">
@@ -154,7 +166,8 @@ export default function Gallery({ studentArtworks, instructorArtworks }: Gallery
             gridTemplateRows: '300px 300px'
           }}>
             {[0, 1, 2, 3].map((position) => {
-              const data = getDisplayedArtwork(position);
+              // Use stable data for SSR, dynamic after mount
+              const data = isMounted ? getDisplayedArtwork(position) : (initialArtworks[position] ? { artwork: initialArtworks[position], originalIndex: position } : null);
               if (!data) return null;
               const { artwork, originalIndex } = data;
               const gridArea = ['photo1', 'photo2', 'photo3', 'photo4'][position];
@@ -162,14 +175,14 @@ export default function Gallery({ studentArtworks, instructorArtworks }: Gallery
 
               return (
                 <div
-                  key={`pos-${position}-${originalIndex}`}
+                  key={`desktop-${position}`}
                   style={{ gridArea }}
                   className={`relative rounded-[20px] overflow-hidden cursor-pointer group ${
-                    !isAnimating ? `animate-gallery-fade-in ${animationDelay}` : 'opacity-0'
+                    isMounted && !isAnimating ? `animate-gallery-fade-in ${animationDelay}` : ''
                   }`}
                   onClick={() => openLightbox(originalIndex)}
                 >
-                  <div className={`absolute inset-0 transition-all duration-500 ${getRotationClass(position)}`}>
+                  <div className={`absolute inset-0 transition-all duration-500 ${isMounted ? getRotationClass(position) : ''}`}>
                     <Image
                       src={getStrapiMediaUrl(artwork.image)}
                       alt={artwork.title || 'Artwork'}
@@ -187,19 +200,19 @@ export default function Gallery({ studentArtworks, instructorArtworks }: Gallery
           {/* Tablet: 2x2 grid */}
           <div className="hidden md:grid lg:hidden grid-cols-2 gap-[15px]">
             {[0, 1, 2, 3].map((position) => {
-              const data = getDisplayedArtwork(position);
+              const data = isMounted ? getDisplayedArtwork(position) : (initialArtworks[position] ? { artwork: initialArtworks[position], originalIndex: position } : null);
               if (!data) return null;
               const { artwork, originalIndex } = data;
 
               return (
                 <div
-                  key={`pos-${position}-${originalIndex}`}
+                  key={`tablet-${position}`}
                   className={`relative aspect-square rounded-[20px] overflow-hidden cursor-pointer group ${
-                    !isAnimating ? `animate-gallery-fade-in animation-delay-${position * 150}` : 'opacity-0'
+                    isMounted && !isAnimating ? `animate-gallery-fade-in animation-delay-${position * 150}` : ''
                   }`}
                   onClick={() => openLightbox(originalIndex)}
                 >
-                  <div className={`absolute inset-0 transition-all duration-500 ${getRotationClass(position)}`}>
+                  <div className={`absolute inset-0 transition-all duration-500 ${isMounted ? getRotationClass(position) : ''}`}>
                     <Image
                       src={getStrapiMediaUrl(artwork.image)}
                       alt={artwork.title || 'Artwork'}
@@ -216,19 +229,19 @@ export default function Gallery({ studentArtworks, instructorArtworks }: Gallery
           {/* Mobile: Single column */}
           <div className="md:hidden flex flex-col gap-[15px]">
             {[0, 1, 2, 3].map((position) => {
-              const data = getDisplayedArtwork(position);
+              const data = isMounted ? getDisplayedArtwork(position) : (initialArtworks[position] ? { artwork: initialArtworks[position], originalIndex: position } : null);
               if (!data) return null;
               const { artwork, originalIndex } = data;
 
               return (
                 <div
-                  key={`pos-${position}-${originalIndex}`}
+                  key={`mobile-${position}`}
                   className={`relative aspect-[4/3] rounded-[20px] overflow-hidden cursor-pointer group ${
-                    !isAnimating ? `animate-gallery-fade-in animation-delay-${position * 150}` : 'opacity-0'
+                    isMounted && !isAnimating ? `animate-gallery-fade-in animation-delay-${position * 150}` : ''
                   }`}
                   onClick={() => openLightbox(originalIndex)}
                 >
-                  <div className={`absolute inset-0 transition-all duration-500 ${getRotationClass(position)}`}>
+                  <div className={`absolute inset-0 transition-all duration-500 ${isMounted ? getRotationClass(position) : ''}`}>
                     <Image
                       src={getStrapiMediaUrl(artwork.image)}
                       alt={artwork.title || 'Artwork'}
