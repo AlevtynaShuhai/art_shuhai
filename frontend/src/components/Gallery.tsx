@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
@@ -17,8 +17,25 @@ export default function Gallery({ studentArtworks, instructorArtworks }: Gallery
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
+  // For rotation: track which indices are displayed in each of 4 positions
+  const [displayedIndices, setDisplayedIndices] = useState<number[]>([0, 1, 2, 3]);
+  // Track which position is currently animating (fading out/in)
+  const [animatingPosition, setAnimatingPosition] = useState<number | null>(null);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+
+  const rotationTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const currentArtworks = (activeTab === 'student' ? studentArtworks : instructorArtworks)
-    .filter(artwork => artwork.image); // Filter out artworks without images
+    .filter(artwork => artwork.image);
+
+  const hasMoreThanFour = currentArtworks.length > 4;
+
+  // Reset displayed indices when tab changes or artworks change
+  useEffect(() => {
+    setDisplayedIndices([0, 1, 2, 3].filter(i => i < currentArtworks.length));
+    setAnimatingPosition(null);
+    setIsFadingOut(false);
+  }, [activeTab, currentArtworks.length]);
 
   // Trigger animation on tab change
   useEffect(() => {
@@ -27,18 +44,78 @@ export default function Gallery({ studentArtworks, instructorArtworks }: Gallery
     return () => clearTimeout(timer);
   }, [activeTab]);
 
+  // Rotation logic
+  const rotateImage = useCallback(() => {
+    if (!hasMoreThanFour || currentArtworks.length <= 4) return;
+
+    // Get indices not currently displayed
+    const hiddenIndices = Array.from({ length: currentArtworks.length }, (_, i) => i)
+      .filter(i => !displayedIndices.includes(i));
+
+    if (hiddenIndices.length === 0) return;
+
+    // Pick random position to replace (0-3)
+    const positionToReplace = Math.floor(Math.random() * Math.min(4, displayedIndices.length));
+    // Pick random hidden image to show
+    const newImageIndex = hiddenIndices[Math.floor(Math.random() * hiddenIndices.length)];
+
+    // Start fade out animation
+    setAnimatingPosition(positionToReplace);
+    setIsFadingOut(true);
+
+    // After fade out, swap the image and fade in
+    setTimeout(() => {
+      setDisplayedIndices(prev => {
+        const newIndices = [...prev];
+        newIndices[positionToReplace] = newImageIndex;
+        return newIndices;
+      });
+      setIsFadingOut(false);
+
+      // Clear animating state after fade in
+      setTimeout(() => {
+        setAnimatingPosition(null);
+      }, 500);
+    }, 500);
+  }, [currentArtworks.length, displayedIndices, hasMoreThanFour]);
+
+  // Set up rotation interval
+  useEffect(() => {
+    if (hasMoreThanFour && !lightboxOpen) {
+      rotationTimerRef.current = setInterval(rotateImage, 3500);
+    }
+
+    return () => {
+      if (rotationTimerRef.current) {
+        clearInterval(rotationTimerRef.current);
+      }
+    };
+  }, [hasMoreThanFour, rotateImage, lightboxOpen]);
+
   const slides = currentArtworks.map((artwork) => ({
     src: getStrapiMediaUrl(artwork.image),
     alt: artwork.title || 'Artwork',
   }));
 
-  const openLightbox = (index: number) => {
-    setLightboxIndex(index);
+  const openLightbox = (artworkIndex: number) => {
+    setLightboxIndex(artworkIndex);
     setLightboxOpen(true);
   };
 
-  // Get first 4 artworks for the asymmetric grid (V1 style)
-  const gridArtworks = currentArtworks.slice(0, 4);
+  // Get artworks to display based on displayedIndices
+  const getDisplayedArtwork = (position: number) => {
+    const index = displayedIndices[position];
+    if (index === undefined || index >= currentArtworks.length) return null;
+    return { artwork: currentArtworks[index], originalIndex: index };
+  };
+
+  // Animation class for rotation
+  const getRotationClass = (position: number) => {
+    if (animatingPosition === position) {
+      return isFadingOut ? 'opacity-0 scale-95' : 'opacity-100 scale-100';
+    }
+    return 'opacity-100 scale-100';
+  };
 
   return (
     <div className="w-full">
@@ -76,117 +153,93 @@ export default function Gallery({ studentArtworks, instructorArtworks }: Gallery
             gridTemplateColumns: '1fr 1fr 1fr',
             gridTemplateRows: '300px 300px'
           }}>
-            {gridArtworks[0] && (
-              <div
-                style={{ gridArea: 'photo1' }}
-                className={`relative rounded-[20px] overflow-hidden cursor-pointer group ${
-                  !isAnimating ? 'animate-gallery-fade-in' : 'opacity-0'
-                }`}
-                onClick={() => openLightbox(0)}
-              >
-                <Image
-                  src={getStrapiMediaUrl(gridArtworks[0].image)}
-                  alt={gridArtworks[0].title || 'Artwork'}
-                  fill
-                  priority
-                  className="object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-              </div>
-            )}
-            {gridArtworks[1] && (
-              <div
-                style={{ gridArea: 'photo2' }}
-                className={`relative rounded-[20px] overflow-hidden cursor-pointer group ${
-                  !isAnimating ? 'animate-gallery-fade-in animation-delay-150' : 'opacity-0'
-                }`}
-                onClick={() => openLightbox(1)}
-              >
-                <Image
-                  src={getStrapiMediaUrl(gridArtworks[1].image)}
-                  alt={gridArtworks[1].title || 'Artwork'}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-              </div>
-            )}
-            {gridArtworks[2] && (
-              <div
-                style={{ gridArea: 'photo3' }}
-                className={`relative rounded-[20px] overflow-hidden cursor-pointer group ${
-                  !isAnimating ? 'animate-gallery-fade-in animation-delay-300' : 'opacity-0'
-                }`}
-                onClick={() => openLightbox(2)}
-              >
-                <Image
-                  src={getStrapiMediaUrl(gridArtworks[2].image)}
-                  alt={gridArtworks[2].title || 'Artwork'}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-              </div>
-            )}
-            {gridArtworks[3] && (
-              <div
-                style={{ gridArea: 'photo4' }}
-                className={`relative rounded-[20px] overflow-hidden cursor-pointer group ${
-                  !isAnimating ? 'animate-gallery-fade-in animation-delay-450' : 'opacity-0'
-                }`}
-                onClick={() => openLightbox(3)}
-              >
-                <Image
-                  src={getStrapiMediaUrl(gridArtworks[3].image)}
-                  alt={gridArtworks[3].title || 'Artwork'}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-              </div>
-            )}
+            {[0, 1, 2, 3].map((position) => {
+              const data = getDisplayedArtwork(position);
+              if (!data) return null;
+              const { artwork, originalIndex } = data;
+              const gridArea = ['photo1', 'photo2', 'photo3', 'photo4'][position];
+              const animationDelay = ['', 'animation-delay-150', 'animation-delay-300', 'animation-delay-450'][position];
+
+              return (
+                <div
+                  key={`pos-${position}-${originalIndex}`}
+                  style={{ gridArea }}
+                  className={`relative rounded-[20px] overflow-hidden cursor-pointer group ${
+                    !isAnimating ? `animate-gallery-fade-in ${animationDelay}` : 'opacity-0'
+                  }`}
+                  onClick={() => openLightbox(originalIndex)}
+                >
+                  <div className={`absolute inset-0 transition-all duration-500 ${getRotationClass(position)}`}>
+                    <Image
+                      src={getStrapiMediaUrl(artwork.image)}
+                      alt={artwork.title || 'Artwork'}
+                      fill
+                      priority={position === 0}
+                      className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Tablet: 2x2 grid */}
           <div className="hidden md:grid lg:hidden grid-cols-2 gap-[15px]">
-            {gridArtworks.map((artwork, index) => (
-              <div
-                key={artwork.id}
-                className={`relative aspect-square rounded-[20px] overflow-hidden cursor-pointer group ${
-                  !isAnimating ? `animate-gallery-fade-in animation-delay-${index * 150}` : 'opacity-0'
-                }`}
-                onClick={() => openLightbox(index)}
-              >
-                <Image
-                  src={getStrapiMediaUrl(artwork.image)}
-                  alt={artwork.title || 'Artwork'}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-              </div>
-            ))}
+            {[0, 1, 2, 3].map((position) => {
+              const data = getDisplayedArtwork(position);
+              if (!data) return null;
+              const { artwork, originalIndex } = data;
+
+              return (
+                <div
+                  key={`pos-${position}-${originalIndex}`}
+                  className={`relative aspect-square rounded-[20px] overflow-hidden cursor-pointer group ${
+                    !isAnimating ? `animate-gallery-fade-in animation-delay-${position * 150}` : 'opacity-0'
+                  }`}
+                  onClick={() => openLightbox(originalIndex)}
+                >
+                  <div className={`absolute inset-0 transition-all duration-500 ${getRotationClass(position)}`}>
+                    <Image
+                      src={getStrapiMediaUrl(artwork.image)}
+                      alt={artwork.title || 'Artwork'}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Mobile: Single column */}
           <div className="md:hidden flex flex-col gap-[15px]">
-            {gridArtworks.map((artwork, index) => (
-              <div
-                key={artwork.id}
-                className={`relative aspect-[4/3] rounded-[20px] overflow-hidden cursor-pointer group ${
-                  !isAnimating ? `animate-gallery-fade-in animation-delay-${index * 150}` : 'opacity-0'
-                }`}
-                onClick={() => openLightbox(index)}
-              >
-                <Image
-                  src={getStrapiMediaUrl(artwork.image)}
-                  alt={artwork.title || 'Artwork'}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-              </div>
-            ))}
+            {[0, 1, 2, 3].map((position) => {
+              const data = getDisplayedArtwork(position);
+              if (!data) return null;
+              const { artwork, originalIndex } = data;
+
+              return (
+                <div
+                  key={`pos-${position}-${originalIndex}`}
+                  className={`relative aspect-[4/3] rounded-[20px] overflow-hidden cursor-pointer group ${
+                    !isAnimating ? `animate-gallery-fade-in animation-delay-${position * 150}` : 'opacity-0'
+                  }`}
+                  onClick={() => openLightbox(originalIndex)}
+                >
+                  <div className={`absolute inset-0 transition-all duration-500 ${getRotationClass(position)}`}>
+                    <Image
+                      src={getStrapiMediaUrl(artwork.image)}
+                      alt={artwork.title || 'Artwork'}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </>
       ) : (
