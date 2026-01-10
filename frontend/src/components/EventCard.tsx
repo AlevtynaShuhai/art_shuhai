@@ -139,13 +139,13 @@ export default function EventCard({ event, onSignUp }: EventCardProps) {
           )}
         </div>
 
-        {/* Sign Up Button - V1 main-button style, full width */}
+        {/* Buy Button - V1 main-button style, full width */}
         <button
           onClick={() => onSignUp(event)}
           disabled={isSoldOut}
           className={`main-button !w-full ${isSoldOut ? '!bg-gray-400 !cursor-not-allowed' : ''}`}
         >
-          {isSoldOut ? 'Sold out' : 'Sign up'}
+          {isSoldOut ? 'Sold out' : 'Buy'}
         </button>
       </div>
     </div>

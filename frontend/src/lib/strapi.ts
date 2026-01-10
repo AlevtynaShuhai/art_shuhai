@@ -209,6 +209,7 @@ export interface Lead {
   eventTime?: string;
   eventPrice?: number;
   eventLocation?: string;
+  participants?: number;
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   orderStatus: 'new' | 'viewed' | 'confirmed' | 'completed' | 'cancelled';
   stripeSessionId?: string;
@@ -234,6 +235,7 @@ export interface CreateLeadInput {
   eventTime?: string;
   eventPrice?: number;
   eventLocation?: string;
+  participants?: number;
   paymentStatus?: 'pending' | 'paid' | 'failed' | 'refunded';
   stripeSessionId?: string;
   securityNonce?: string;

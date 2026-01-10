@@ -33,6 +33,13 @@ export default function OrderModal({
 }: OrderModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [participants, setParticipants] = useState(1);
+
+  // Calculate available seats and max participants
+  const availableSeats = event?.capacity != null
+    ? event.capacity - (event.bookedSeats || 0)
+    : null;
+  const maxParticipants = availableSeats !== null ? Math.max(1, availableSeats) : 10;
 
   const {
     register,
@@ -103,6 +110,7 @@ export default function OrderModal({
           eventTime: getTimeDisplay(),
           eventPrice: actualPrice,
           eventLocation: event.location,
+          participants,
         }),
       });
 
@@ -114,12 +122,14 @@ export default function OrderModal({
       const { url } = await response.json();
 
       // Track checkout initiation
+      const totalPrice = actualPrice * participants;
       trackBeginCheckout([{
         id: event.documentId,
         name: event.title,
-        price: actualPrice,
+        price: totalPrice,
+        quantity: participants,
       }]);
-      trackFBInitiateCheckout(actualPrice);
+      trackFBInitiateCheckout(totalPrice);
       trackFormSubmit('order_form', { event_name: event.title });
 
       if (url) {
@@ -135,6 +145,7 @@ export default function OrderModal({
   const handleClose = () => {
     reset();
     setError(null);
+    setParticipants(1);
     onClose();
   };
 
@@ -169,7 +180,7 @@ export default function OrderModal({
 
               {/* Title */}
               <h2 className="font-serif text-[26px] lg:text-[42px] font-normal leading-[115%] text-center mb-[15px] lg:mb-[25px] px-[20px] lg:px-[40px]">
-                {isRegularClass ? 'Sign up for the regular classes' : 'Sign up for the art class'}
+                {isRegularClass ? 'Book regular classes' : 'Book art class'}
               </h2>
             </div>
 
@@ -209,10 +220,10 @@ export default function OrderModal({
                     the friendly atmosphere of creativity
                   </div>
 
-                  {/* Price */}
+                  {/* Price per person */}
                   <div className="flex items-center gap-2 text-[15px] leading-[150%] mb-[10px] flex-wrap">
                     <img src="/assets/img/icon-price.svg" alt="" />
-                    <span>Price:</span>
+                    <span>Price per person:</span>
                     {event.discount && event.discount < event.price ? (
                       <>
                         <span className="line-through text-gray-400">${event.price}</span>
@@ -233,7 +244,7 @@ export default function OrderModal({
 
                   {/* Available Seats */}
                   {event.capacity != null && (
-                    <div className={`flex items-center gap-2 text-[15px] leading-[150%] mb-[20px] lg:mb-0 ${
+                    <div className={`flex items-center gap-2 text-[15px] leading-[150%] mb-[10px] ${
                       event.capacity - (event.bookedSeats || 0) <= 5 ? 'text-orange-600 font-medium' : ''
                     }`}>
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,6 +253,50 @@ export default function OrderModal({
                       Available spots: {event.capacity - (event.bookedSeats || 0)} of {event.capacity}
                     </div>
                   )}
+
+                  {/* Participants Selector */}
+                  <div className="flex items-center gap-3 text-[15px] leading-[150%] mb-[10px]">
+                    <span className="font-medium">Participants:</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setParticipants(p => Math.max(1, p - 1))}
+                        disabled={participants <= 1}
+                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-lg font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+                      >
+                        −
+                      </button>
+                      <span className="w-8 text-center font-semibold text-lg">{participants}</span>
+                      <button
+                        type="button"
+                        onClick={() => setParticipants(p => Math.min(maxParticipants, p + 1))}
+                        disabled={participants >= maxParticipants}
+                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-lg font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+                      >
+                        +
+                      </button>
+                    </div>
+                    {availableSeats !== null && participants >= maxParticipants && (
+                      <span className="text-[13px] text-orange-600">Max available</span>
+                    )}
+                  </div>
+
+                  {/* Total Price */}
+                  {(() => {
+                    const unitPrice = (event.discount && event.discount < event.price) ? event.discount : event.price;
+                    const totalPrice = unitPrice * participants;
+                    return (
+                      <div className="flex items-center gap-2 text-[18px] leading-[150%] mb-[20px] lg:mb-0 font-semibold">
+                        <span>Total:</span>
+                        <span className="text-[#0D882B]">${totalPrice}</span>
+                        {participants > 1 && (
+                          <span className="text-[13px] font-normal text-gray-500">
+                            (${unitPrice} × {participants})
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Right Column - Form */}

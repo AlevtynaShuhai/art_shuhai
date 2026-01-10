@@ -615,6 +615,14 @@ export interface ApiLeadLead extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.DefaultTo<'new'>;
     paidAt: Schema.Attribute.DateTime;
+    participants: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 1;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<1>;
     paymentStatus: Schema.Attribute.Enumeration<
       ['pending', 'paid', 'failed', 'refunded']
     > &

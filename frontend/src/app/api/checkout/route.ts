@@ -17,6 +17,7 @@ const checkoutSchema = z.object({
   eventPrice: z.number().positive(),
   eventLocation: z.string(),
   isSubscribed: z.boolean().default(false),
+  participants: z.number().int().min(1).default(1),
 });
 
 export async function POST(request: NextRequest) {
@@ -39,6 +40,7 @@ export async function POST(request: NextRequest) {
       eventTime: validatedData.eventTime,
       eventPrice: validatedData.eventPrice,
       eventLocation: validatedData.eventLocation,
+      participants: validatedData.participants,
       paymentStatus: 'pending',
       securityNonce,
       isSubscribed: validatedData.isSubscribed,
@@ -63,6 +65,7 @@ export async function POST(request: NextRequest) {
       message: validatedData.message,
       leadDocumentId,
       securityNonce,
+      participants: validatedData.participants,
     });
 
     // Add to Google Sheets if subscribed (async, don't wait)

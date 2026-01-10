@@ -43,6 +43,11 @@
     "eventPrice": {
       "type": "decimal"
     },
+    "participants": {
+      "type": "integer",
+      "default": 1,
+      "min": 1
+    },
     "eventLocation": {
       "type": "string"
     },

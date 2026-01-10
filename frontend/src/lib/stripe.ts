@@ -29,6 +29,7 @@ export interface CreateCheckoutSessionParams {
   message?: string;
   leadDocumentId: string;
   securityNonce: string;
+  participants?: number;
 }
 
 export async function createCheckoutSession(params: CreateCheckoutSessionParams) {
@@ -45,6 +46,7 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
     message,
     leadDocumentId,
     securityNonce,
+    participants = 1,
   } = params;
 
   const session = await getStripe().checkout.sessions.create({
@@ -58,11 +60,11 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
           currency: 'cad',
           product_data: {
             name: eventName,
-            description: `${eventDate} at ${eventTime}\n${eventLocation}`,
+            description: `${eventDate} at ${eventTime}\n${eventLocation}${participants > 1 ? `\n${participants} participants` : ''}`,
           },
           unit_amount: Math.round(eventPrice * 100), // Convert to cents
         },
-        quantity: 1,
+        quantity: participants,
       },
     ],
     metadata: {
@@ -77,6 +79,7 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
       customerPhone: customerPhone || '',
       message: message || '',
       securityNonce,
+      participants: String(participants),
     },
     success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/thank-you?session_id={CHECKOUT_SESSION_ID}&lead_id=${leadDocumentId}`,
     cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}?canceled=true`,

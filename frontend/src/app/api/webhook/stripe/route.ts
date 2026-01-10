@@ -130,10 +130,11 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     try {
       const leadData = await getLead(leadDocumentId);
       const event = leadData?.data?.event;
+      const participants = parseInt(metadata.participants || '1', 10) || 1;
 
       if (event && event.capacity != null) {
-        const newBookedSeats = (event.bookedSeats || 0) + 1;
-        console.log('[Webhook] Incrementing bookedSeats for event:', event.documentId, 'from', event.bookedSeats || 0, 'to', newBookedSeats);
+        const newBookedSeats = (event.bookedSeats || 0) + participants;
+        console.log('[Webhook] Incrementing bookedSeats for event:', event.documentId, 'from', event.bookedSeats || 0, 'to', newBookedSeats, '(participants:', participants, ')');
 
         await updateEvent(event.documentId, {
           bookedSeats: newBookedSeats,
