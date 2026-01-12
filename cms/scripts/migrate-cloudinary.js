@@ -1,11 +1,5 @@
 /**
- * Full Cloudinary Migration Script
- *
- * Uploads all files from local storage to Cloudinary
- * and updates URLs in Strapi database.
- *
- * Run on Railway: railway run node scripts/full-cloudinary-migration.js
- * Or locally: node scripts/full-cloudinary-migration.js
+ * Migrate local files to Cloudinary and update database URLs
  */
 
 const cloudinary = require('cloudinary').v2;
@@ -20,25 +14,24 @@ cloudinary.config({
 });
 
 async function migrate() {
-  console.log('=== Cloudinary Migration ===\n');
+  console.log('=== Migrate to Cloudinary ===\n');
 
   // Check Cloudinary config
   if (!process.env.CLOUDINARY_NAME || !process.env.CLOUDINARY_KEY || !process.env.CLOUDINARY_SECRET) {
     console.error('Error: Missing Cloudinary environment variables');
-    console.error('Required: CLOUDINARY_NAME, CLOUDINARY_KEY, CLOUDINARY_SECRET');
     process.exit(1);
   }
 
   console.log(`Cloudinary: ${process.env.CLOUDINARY_NAME}\n`);
 
-  // Load Strapi (Strapi 5 syntax)
+  // Load Strapi
   console.log('Loading Strapi...');
   const { createStrapi } = require('@strapi/strapi');
-  const app = await createStrapi({ distDir: './dist' }).load();
+  const strapi = await createStrapi({ distDir: './dist' }).load();
   console.log('Strapi loaded.\n');
 
   // Get all files from database
-  const files = await app.db.query('plugin::upload.file').findMany({});
+  const files = await strapi.db.query('plugin::upload.file').findMany({});
   console.log(`Found ${files.length} files in database\n`);
 
   const uploadsDir = path.join(__dirname, '../public/uploads');
@@ -47,7 +40,7 @@ async function migrate() {
   for (const file of files) {
     // Skip if already on Cloudinary
     if (file.url && file.url.includes('cloudinary.com')) {
-      console.log(`⊘ ${file.name} - already migrated`);
+      console.log(`⊘ ${file.name} - already on Cloudinary`);
       results.skipped++;
       continue;
     }
@@ -55,7 +48,7 @@ async function migrate() {
     const localPath = path.join(uploadsDir, file.hash + file.ext);
 
     if (!fs.existsSync(localPath)) {
-      console.log(`⊘ ${file.name} - local file not found`);
+      console.log(`⊘ ${file.name} - file not found: ${file.hash}${file.ext}`);
       results.skipped++;
       continue;
     }
@@ -76,7 +69,7 @@ async function migrate() {
       results.uploaded++;
 
       // Update database
-      await app.db.query('plugin::upload.file').update({
+      await strapi.db.query('plugin::upload.file').update({
         where: { id: file.id },
         data: {
           url: uploadResult.secure_url,
@@ -103,7 +96,7 @@ async function migrate() {
   console.log(`Skipped: ${results.skipped}`);
   console.log(`Failed: ${results.failed}`);
 
-  await app.destroy();
+  await strapi.destroy();
   process.exit(0);
 }
 
