@@ -47,7 +47,7 @@ export async function sendOrderEmails(data: OrderEmailData): Promise<void> {
   // Send customer confirmation email
   try {
     await client.emails.send({
-      from: 'Drawing Master <noreply@drawingmaster.ca>',
+      from: 'Drawing Master <onboarding@resend.dev>',
       to: data.customerEmail,
       subject: `Booking Confirmed: ${data.eventName}`,
       react: OrderConfirmationCustomer({ data }),
@@ -61,7 +61,7 @@ export async function sendOrderEmails(data: OrderEmailData): Promise<void> {
   if (adminEmail) {
     try {
       await client.emails.send({
-        from: 'Drawing Master <noreply@drawingmaster.ca>',
+        from: 'Drawing Master <onboarding@resend.dev>',
         to: adminEmail,
         subject: `New Booking: ${data.eventName} - ${data.customerName}`,
         react: OrderNotificationAdmin({ data }),
