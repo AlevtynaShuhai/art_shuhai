@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { constructWebhookEvent, retrievePaymentIntent } from '@/lib/stripe';
-import { updateLead, getLead, updateEvent } from '@/lib/strapi';
+import { updateLead, getLead, updateEvent, getSettings, getStrapiMediaUrl } from '@/lib/strapi';
+import { sendOrderEmails } from '@/lib/email';
 import type Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -140,6 +141,42 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
           bookedSeats: newBookedSeats,
         });
         console.log('[Webhook] Event bookedSeats updated successfully');
+      }
+
+      // Send order confirmation emails
+      if (leadData?.data) {
+        const lead = leadData.data;
+        try {
+          // Get settings for contact info
+          const settingsData = await getSettings();
+          const settings = settingsData?.data;
+
+          // Get event image URL
+          const eventImageUrl = event?.image ? getStrapiMediaUrl(event.image) : undefined;
+
+          await sendOrderEmails({
+            customerName: lead.name,
+            customerEmail: lead.email,
+            customerPhone: lead.phone,
+            eventName: lead.eventName || 'Event',
+            eventDate: lead.eventDate || '',
+            eventTime: lead.eventTime || '',
+            eventLocation: lead.eventLocation,
+            eventImage: eventImageUrl,
+            eventDescription: event?.shortDescription,
+            eventIncludes: event?.includes?.map((item) => item.text),
+            participants: lead.participants || 1,
+            amountPaid: (session.amount_total || 0) / 100,
+            currency: session.currency || 'cad',
+            receiptUrl: receiptUrl,
+            message: lead.message,
+            contactEmail: settings?.email,
+            contactPhone: settings?.phone,
+          });
+          console.log('[Webhook] Order confirmation emails sent');
+        } catch (emailError) {
+          console.error('[Webhook] Failed to send order emails:', emailError);
+        }
       }
     } catch (err) {
       console.error('[Webhook] Failed to update event bookedSeats:', err);

@@ -10,24 +10,29 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@react-email/components": "^1.0.4",
     "@stripe/stripe-js": "^8.6.0",
     "googleapis": "^169.0.0",
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.69.0",
+    "resend": "^6.7.0",
     "stripe": "^20.1.0",
     "swiper": "^12.0.3",
     "yet-another-react-lightbox": "^3.28.0",
     "zod": "^4.3.4"
   },
   "devDependencies": {
+    "@react-email/preview-server": "^5.2.1",
+    "@react-email/render": "^2.0.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
+    "react-email": "^5.2.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
