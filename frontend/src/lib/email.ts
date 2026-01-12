@@ -2,7 +2,18 @@ import { Resend } from 'resend';
 import { OrderConfirmationCustomer } from '@/emails/OrderConfirmationCustomer';
 import { OrderNotificationAdmin } from '@/emails/OrderNotificationAdmin';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization to avoid build-time errors
+let resend: Resend | null = null;
+
+function getResendClient(): Resend | null {
+  if (!process.env.RESEND_API_KEY) {
+    return null;
+  }
+  if (!resend) {
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resend;
+}
 
 export interface OrderEmailData {
   customerName: string;
@@ -25,16 +36,17 @@ export interface OrderEmailData {
 }
 
 export async function sendOrderEmails(data: OrderEmailData): Promise<void> {
+  const client = getResendClient();
   const adminEmail = process.env.ADMIN_EMAIL;
 
-  if (!process.env.RESEND_API_KEY) {
+  if (!client) {
     console.error('[Email] RESEND_API_KEY not configured');
     return;
   }
 
   // Send customer confirmation email
   try {
-    await resend.emails.send({
+    await client.emails.send({
       from: 'Drawing Master <noreply@drawingmaster.ca>',
       to: data.customerEmail,
       subject: `Booking Confirmed: ${data.eventName}`,
@@ -48,7 +60,7 @@ export async function sendOrderEmails(data: OrderEmailData): Promise<void> {
   // Send admin notification email
   if (adminEmail) {
     try {
-      await resend.emails.send({
+      await client.emails.send({
         from: 'Drawing Master <noreply@drawingmaster.ca>',
         to: adminEmail,
         subject: `New Booking: ${data.eventName} - ${data.customerName}`,
