@@ -31,10 +31,10 @@ async function migrate() {
 
   console.log(`Cloudinary: ${process.env.CLOUDINARY_NAME}\n`);
 
-  // Load Strapi
+  // Load Strapi (Strapi 5 syntax)
   console.log('Loading Strapi...');
-  const strapi = require('@strapi/strapi');
-  const app = await strapi().load();
+  const { createStrapi } = require('@strapi/strapi');
+  const app = await createStrapi({ distDir: './dist' }).load();
   console.log('Strapi loaded.\n');
 
   // Get all files from database
