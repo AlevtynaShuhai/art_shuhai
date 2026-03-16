@@ -1,4 +1,6 @@
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+// Internal URL for server-side requests (Railway internal network)
+const STRAPI_SERVER_URL = process.env.STRAPI_INTERNAL_URL || STRAPI_URL;
 const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
 
 interface StrapiResponse<T> {
@@ -34,7 +36,7 @@ async function fetchStrapi<T>(
   };
 
   try {
-    const url = `${STRAPI_URL}/api${endpoint}`;
+    const url = `${STRAPI_SERVER_URL}/api${endpoint}`;
 
     const response = await fetch(url, {
       ...options,
