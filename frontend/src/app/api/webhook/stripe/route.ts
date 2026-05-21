@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { constructWebhookEvent, retrievePaymentIntent } from '@/lib/stripe';
 import { updateLead, getLead, updateEvent, getSettings, getStrapiMediaUrl } from '@/lib/strapi';
 import { sendOrderEmails } from '@/lib/email';
+import { sendCapiEvent } from '@/lib/meta-capi';
 import type Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -177,6 +178,33 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         } catch (emailError) {
           console.error('[Webhook] Failed to send order emails:', emailError);
         }
+
+        // Meta CAPI Purchase event — event_id = stripe session id so dedup with
+        // any client-side fbq('track','Purchase',{eventID: session.id}) works.
+        const [firstName, ...rest] = (lead.name || '').trim().split(/\s+/);
+        const lastName = rest.join(' ') || undefined;
+        sendCapiEvent({
+          eventName: 'Purchase',
+          eventId: session.id,
+          eventSourceUrl: session.success_url || 'https://art-shuhai.com/thank-you',
+          actionSource: 'website',
+          userData: {
+            email: lead.email,
+            phone: lead.phone || undefined,
+            firstName: firstName || undefined,
+            lastName,
+            country: 'ca',
+          },
+          customData: {
+            value: (session.amount_total || 0) / 100,
+            currency: (session.currency || 'cad').toUpperCase(),
+            contentName: lead.eventName || undefined,
+            contentIds: event?.documentId ? [event.documentId] : undefined,
+            contentType: 'product',
+            numItems: lead.participants || 1,
+            orderId: session.id,
+          },
+        }).catch((err) => console.error('[Webhook CAPI] Purchase dispatch failed:', err));
       }
     } catch (err) {
       console.error('[Webhook] Failed to update event bookedSeats:', err);

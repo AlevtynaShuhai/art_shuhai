@@ -1,18 +1,8 @@
-'use client';
-
-import GoogleAnalytics from './GoogleAnalytics';
-import FacebookPixel from './FacebookPixel';
+import GTM from './GTM';
 
 export default function Analytics() {
-  return (
-    <>
-      <GoogleAnalytics />
-      <FacebookPixel />
-    </>
-  );
+  return <GTM />;
 }
 
-export { GoogleAnalytics };
-export { FacebookPixel };
+export { GTM };
 export * from '@/lib/analytics';
-export { trackFBPurchase, trackFBLead, trackFBInitiateCheckout, trackFBEvent } from './FacebookPixel';

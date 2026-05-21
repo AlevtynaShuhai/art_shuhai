@@ -5,8 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Event } from '@/lib/strapi';
-import { trackBeginCheckout, trackFormSubmit } from '@/lib/analytics';
-import { trackFBInitiateCheckout } from '@/components/Analytics/FacebookPixel';
+import { trackBeginCheckout } from '@/lib/analytics';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -119,18 +118,18 @@ export default function OrderModal({
         throw new Error(errorData.error || 'Failed to create checkout session');
       }
 
-      const { url } = await response.json();
+      const { url, eventId } = await response.json();
 
-      // Track checkout initiation
+      // event_id from server matches CAPI InitiateCheckout event for dedup.
       const totalPrice = actualPrice * participants;
-      trackBeginCheckout([{
-        id: event.documentId,
-        name: event.title,
-        price: totalPrice,
-        quantity: participants,
-      }]);
-      trackFBInitiateCheckout(totalPrice);
-      trackFormSubmit('order_form', { event_name: event.title });
+      trackBeginCheckout({
+        eventId,
+        value: totalPrice,
+        currency: 'CAD',
+        contentName: event.title,
+        contentIds: [event.documentId],
+        numItems: participants,
+      });
 
       if (url) {
         window.location.href = url;

@@ -5,8 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Image from 'next/image';
-import { trackFormSubmit } from '@/lib/analytics';
-import { trackFBLead } from '@/components/Analytics/FacebookPixel';
+import { trackLead } from '@/lib/analytics';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -45,9 +44,9 @@ export default function ContactForm() {
         throw new Error('Failed to send message');
       }
 
-      // Track successful form submission
-      trackFormSubmit('contact_form');
-      trackFBLead();
+      // event_id from server matches the CAPI Lead event for dedup.
+      const { eventId } = await response.json().catch(() => ({}));
+      trackLead({ eventId, formName: 'contact_form' });
 
       setIsSuccess(true);
       reset();

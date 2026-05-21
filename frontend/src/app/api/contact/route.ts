@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createLead } from '@/lib/strapi';
+import { sendCapiEvent, generateEventId, extractUserContext } from '@/lib/meta-capi';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name is required'),
@@ -21,7 +22,24 @@ export async function POST(request: NextRequest) {
       paymentStatus: 'pending', // Not a payment, just contact
     });
 
-    return NextResponse.json({ success: true });
+    const eventId = generateEventId();
+    const [firstName, ...rest] = validatedData.name.trim().split(/\s+/);
+    const lastName = rest.join(' ') || undefined;
+
+    sendCapiEvent({
+      eventName: 'Lead',
+      eventId,
+      eventSourceUrl: request.headers.get('referer') || 'https://art-shuhai.com/',
+      userData: {
+        email: validatedData.email,
+        firstName,
+        lastName,
+        country: 'ca',
+        ...extractUserContext(request),
+      },
+    }).catch((err) => console.error('[Contact CAPI] dispatch failed:', err));
+
+    return NextResponse.json({ success: true, eventId });
   } catch (error) {
     console.error('Contact form error:', error);
 

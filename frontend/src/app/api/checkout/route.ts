@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createCheckoutSession } from '@/lib/stripe';
 import { createLead } from '@/lib/strapi';
 import { addSubscriber } from '@/lib/googleSheets';
+import { sendCapiEvent, generateEventId, extractUserContext } from '@/lib/meta-capi';
 import crypto from 'crypto';
 
 const checkoutSchema = z.object({
@@ -76,9 +77,36 @@ export async function POST(request: NextRequest) {
       }).catch(console.error);
     }
 
+    const eventId = generateEventId();
+    const [firstName, ...rest] = validatedData.name.trim().split(/\s+/);
+    const lastName = rest.join(' ') || undefined;
+
+    sendCapiEvent({
+      eventName: 'InitiateCheckout',
+      eventId,
+      eventSourceUrl: request.headers.get('referer') || 'https://art-shuhai.com/',
+      userData: {
+        email: validatedData.email,
+        phone: validatedData.phone,
+        firstName,
+        lastName,
+        country: 'ca',
+        ...extractUserContext(request),
+      },
+      customData: {
+        value: validatedData.eventPrice * validatedData.participants,
+        currency: 'CAD',
+        contentName: validatedData.eventName,
+        contentIds: validatedData.eventId ? [validatedData.eventId] : undefined,
+        contentType: 'product',
+        numItems: validatedData.participants,
+      },
+    }).catch((err) => console.error('[Checkout CAPI] dispatch failed:', err));
+
     return NextResponse.json({
       sessionId: session.id,
       url: session.url,
+      eventId,
     });
   } catch (error) {
     console.error('Checkout error:', error);
