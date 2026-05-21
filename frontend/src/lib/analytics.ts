@@ -1,144 +1,119 @@
-// Google Analytics 4 - Event Tracking
-// https://developers.google.com/analytics/devguides/collection/ga4/reference/events
+// Analytics — all events go through GTM dataLayer.
+// GTM container fans them out to GA4 + Meta Pixel (+ CAPI on the server).
 
-export const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+export const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
-// Check if analytics should be enabled
-export const isAnalyticsEnabled = (): boolean => {
-  return (
-    typeof window !== 'undefined' &&
-    !!GA_ID &&
-    process.env.NODE_ENV === 'production'
-  );
+const isBrowser = (): boolean => typeof window !== 'undefined';
+
+const pushDataLayer = (payload: Record<string, unknown>): void => {
+  if (!isBrowser()) return;
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push(payload);
 };
 
-// Core gtag function
-export const gtag = (...args: unknown[]): void => {
-  if (!isAnalyticsEnabled()) return;
-  window.gtag?.(...args);
+const generateClientEventId = (): string => {
+  if (isBrowser() && 'crypto' in window && 'randomUUID' in window.crypto) {
+    return window.crypto.randomUUID().replace(/-/g, '');
+  }
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
 };
 
-// Page view tracking (for SPA navigation)
+// ----- Page views (GA4 has Enhanced Measurement on All Pages, but we also
+// push manually so SPA route changes are tracked) -----
+
 export const trackPageView = (url: string): void => {
-  gtag('config', GA_ID, {
-    page_path: url,
-  });
+  pushDataLayer({ event: 'page_view', page_path: url });
 };
 
-// ----- E-commerce Events -----
+// ----- Lead / contact form -----
 
-// When user views a product/class
-export const trackViewItem = (item: {
-  id: string;
-  name: string;
-  price: number;
-  category?: string;
-}): void => {
-  gtag('event', 'view_item', {
-    currency: 'CAD',
-    value: item.price,
-    items: [{
-      item_id: item.id,
-      item_name: item.name,
-      item_category: item.category || 'Art Class',
-      price: item.price,
-    }],
-  });
+export type LeadParams = {
+  eventId?: string;
+  formName?: string;
+  email?: string;
 };
 
-// When user starts checkout
-export const trackBeginCheckout = (items: {
-  id: string;
-  name: string;
-  price: number;
-  quantity?: number;
-}[]): void => {
-  const value = items.reduce((sum, item) => sum + item.price * (item.quantity || 1), 0);
-
-  gtag('event', 'begin_checkout', {
-    currency: 'CAD',
-    value,
-    items: items.map(item => ({
-      item_id: item.id,
-      item_name: item.name,
-      item_category: 'Art Class',
-      price: item.price,
-      quantity: item.quantity || 1,
-    })),
-  });
-};
-
-// When purchase is completed
-export const trackPurchase = (transaction: {
-  transactionId: string;
-  value: number;
-  items: {
-    id: string;
-    name: string;
-    price: number;
-    quantity?: number;
-  }[];
-}): void => {
-  gtag('event', 'purchase', {
-    transaction_id: transaction.transactionId,
-    currency: 'CAD',
-    value: transaction.value,
-    items: transaction.items.map(item => ({
-      item_id: item.id,
-      item_name: item.name,
-      item_category: 'Art Class',
-      price: item.price,
-      quantity: item.quantity || 1,
-    })),
-  });
-};
-
-// ----- Lead Generation Events -----
-
-// When user submits a form (booking, contact, etc.)
-export const trackFormSubmit = (formName: string, formData?: Record<string, unknown>): void => {
-  gtag('event', 'generate_lead', {
+export const trackLead = ({ eventId, formName }: LeadParams = {}): void => {
+  pushDataLayer({
+    event: 'lead_submit',
+    event_id: eventId ?? generateClientEventId(),
     form_name: formName,
-    ...formData,
   });
 };
 
-// When user signs up for newsletter or class
-export const trackSignUp = (method: string): void => {
-  gtag('event', 'sign_up', {
-    method,
+// ----- Begin checkout -----
+
+export type BeginCheckoutParams = {
+  eventId?: string;
+  value: number;
+  currency?: string;
+  contentName?: string;
+  contentIds?: string[];
+  numItems?: number;
+};
+
+export const trackBeginCheckout = (params: BeginCheckoutParams): void => {
+  pushDataLayer({
+    event: 'begin_checkout',
+    event_id: params.eventId ?? generateClientEventId(),
+    value: params.value,
+    currency: params.currency ?? 'CAD',
+    content_name: params.contentName,
+    content_ids: params.contentIds,
+    num_items: params.numItems ?? 1,
   });
 };
 
-// ----- Engagement Events -----
+// ----- Purchase -----
 
-// When user clicks on important CTA
-export const trackCTAClick = (ctaName: string, ctaLocation?: string): void => {
-  gtag('event', 'cta_click', {
-    cta_name: ctaName,
-    cta_location: ctaLocation,
+export type PurchaseParams = {
+  eventId: string;
+  value: number;
+  currency?: string;
+  contentName?: string;
+  contentIds?: string[];
+  numItems?: number;
+};
+
+export const trackPurchase = (params: PurchaseParams): void => {
+  pushDataLayer({
+    event: 'purchase',
+    event_id: params.eventId,
+    value: params.value,
+    currency: params.currency ?? 'CAD',
+    content_name: params.contentName,
+    content_ids: params.contentIds,
+    num_items: params.numItems ?? 1,
   });
 };
 
-// When user views a specific section
-export const trackSectionView = (sectionName: string): void => {
-  gtag('event', 'section_view', {
-    section_name: sectionName,
-  });
-};
+// ----- Generic / utility -----
 
-// Generic custom event
 export const trackEvent = (
   eventName: string,
-  params?: Record<string, unknown>
+  params?: Record<string, unknown>,
 ): void => {
-  gtag('event', eventName, params);
+  pushDataLayer({ event: eventName, ...params });
 };
 
-// ----- Type declarations -----
+// ----- Backward-compatible aliases (some callers still import these) -----
+
+export const trackFormSubmit = (formName: string): void => {
+  trackLead({ formName });
+};
+
+export const trackFBLead = (): void => trackLead();
+
+export const trackFBInitiateCheckout = (value: number, currency = 'CAD'): void => {
+  trackBeginCheckout({ value, currency });
+};
+
+export const trackFBPurchase = (value: number, currency = 'CAD', eventId?: string): void => {
+  trackPurchase({ eventId: eventId ?? generateClientEventId(), value, currency });
+};
+
 declare global {
   interface Window {
-    gtag?: (...args: unknown[]) => void;
     dataLayer?: unknown[];
   }
 }

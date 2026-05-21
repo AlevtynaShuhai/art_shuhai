@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { trackPurchase } from '@/lib/analytics';
-import { trackFBPurchase } from '@/components/Analytics/FacebookPixel';
 
 function ThankYouContent() {
   const searchParams = useSearchParams();
@@ -25,19 +24,16 @@ function ThankYouContent() {
           if (data.success && data.session) {
             const { session } = data;
 
-            // Track purchase in Google Analytics
+            // event_id matches server-side CAPI Purchase (Stripe session id) so
+            // Meta dedupes browser pixel + server event.
             trackPurchase({
-              transactionId: session.id,
+              eventId: session.id,
               value: (session.amount_total || 0) / 100,
-              items: [{
-                id: session.metadata?.eventId || 'unknown',
-                name: session.metadata?.eventName || 'Art Class',
-                price: (session.amount_total || 0) / 100,
-              }],
+              currency: (session.currency || 'cad').toUpperCase(),
+              contentName: session.metadata?.eventName || 'Art Class',
+              contentIds: session.metadata?.eventId ? [session.metadata.eventId] : undefined,
+              numItems: parseInt(session.metadata?.participants || '1', 10) || 1,
             });
-
-            // Track purchase in Facebook Pixel
-            trackFBPurchase((session.amount_total || 0) / 100);
 
             hasTracked.current = true;
           }
